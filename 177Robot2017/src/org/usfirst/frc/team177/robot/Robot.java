@@ -2,6 +2,7 @@ package org.usfirst.frc.team177.robot;
 
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,6 +42,9 @@ public class Robot extends IterativeRobot {
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	SendableChooser<String> chooser = new SendableChooser<>();
+	
+    long autoStartTime;
+
 
 	public Robot() {
 		//myRobot.setExpiration(0.1);
@@ -67,5 +71,42 @@ public class Robot extends IterativeRobot {
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		drive.drive(left, right);
 	}
+
+	/**
+     * This function is called periodically during test mode
+     */
+    public void testPeriodic() {
+    	/** This is crazy reverse code just to test that test mode is working **/
+     	/** Joysticks work on x axis (left to righ) **/
+     	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value)  * INVERT_MOTOR;
+ 		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
+ 		drive.drive(left, right);
+    }
+    
+    public void autonomousInit() {    			
+  		autoStartTime = System.currentTimeMillis();
+    }
+    
+    /**
+     * This function is called periodically during autonomous
+     */
+    public void autonomousPeriodic() {
+    	/** This is sample code just to test automonous mode **/
+    	/** Code drive left motors for 2 sec, right motors for 2 secs, then stops */
+    	long currentTime = System.currentTimeMillis();
+    	long currentDuration = currentTime - autoStartTime;
+    	
+    	if (currentDuration < 2000L ) {
+    		drive.drive(1.0,0.0);
+    	}
+    	else
+    	if (currentDuration < 4000L ) {
+    		drive.drive(0.0,1.0);
+    	}
+    	else
+		if (currentDuration > 6000L ) {
+    		drive.stop();
+       }
+   }
 
 }
