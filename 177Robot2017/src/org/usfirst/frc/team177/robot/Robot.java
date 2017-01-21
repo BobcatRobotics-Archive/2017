@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
+	private static final double INVERT_MOTOR = -1.0;
+	
 	/** Drive Chain Motors **/
 	DriveChain drive = new DriveChain();
 
@@ -50,7 +52,7 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto modes", chooser);
 		
-		drive.setLeftMotors(6, 7, 8);
+		drive.setLeftMotors(3, 4, 5);
 		drive.setRightMotors(0, 1, 2);
 	}
 
@@ -61,7 +63,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 		
     	//Driving
-    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
+    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value)  * INVERT_MOTOR;
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		drive.drive(left, right);
 	}
