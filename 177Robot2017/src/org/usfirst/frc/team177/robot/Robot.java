@@ -2,7 +2,7 @@ package org.usfirst.frc.team177.robot;
 
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
-
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
@@ -32,13 +32,15 @@ public class Robot extends IterativeRobot {
 	private static final double INVERT_MOTOR = -1.0;
 	
 	/** Drive Chain Motors **/
-	DriveChain drive = new DriveChain();
+	DriveChain driveTrain = new DriveChain();
 
-	//RobotDrive myRobot = new RobotDrive(0, 1);
 	/**Joysticks**/    
 	Joystick leftStick = new Joystick(0);
 	Joystick rightStick = new Joystick(1);
 	
+	/** Solenoids **/ 
+	public Solenoid shiftPneumatic = new Solenoid(0); /* For shifting */
+
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	SendableChooser<String> chooser = new SendableChooser<>();
@@ -56,8 +58,8 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto modes", chooser);
 		
-		drive.setLeftMotors(3, 4, 5);
-		drive.setRightMotors(0, 1, 2);
+		driveTrain.setLeftMotors(3, 4, 5);
+		driveTrain.setRightMotors(0, 1, 2);
 	}
 
 	  /**
@@ -69,7 +71,9 @@ public class Robot extends IterativeRobot {
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value)  * INVERT_MOTOR;
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
-		drive.drive(left, right);
+		driveTrain.drive(left, right);
+		
+		shiftPneumatic.set(rightStick.getRawButton(Joystick.ButtonType.kNumButton.value));
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class Robot extends IterativeRobot {
      	/** Joysticks work on x axis (left to righ) **/
      	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value)  * INVERT_MOTOR;
  		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
- 		drive.drive(left, right);
+ 		driveTrain.drive(left, right);
     }
     
     public void autonomousInit() {    			
@@ -97,15 +101,15 @@ public class Robot extends IterativeRobot {
     	long currentDuration = currentTime - autoStartTime;
     	
     	if (currentDuration < 2000L ) {
-    		drive.drive(1.0,0.0);
+    		driveTrain.drive(1.0,0.0);
     	}
     	else
     	if (currentDuration < 4000L ) {
-    		drive.drive(0.0,1.0);
+    		driveTrain.drive(0.0,1.0);
     	}
     	else
 		if (currentDuration > 6000L ) {
-    		drive.stop();
+    		driveTrain.stop();
        }
    }
 
