@@ -76,7 +76,8 @@ public class Robot extends IterativeRobot {
      */
 	@Override
     public void teleopPeriodic() {
-		// Display Joystick status
+		/** Display Joystick status **/
+		/** For testing only **/
 		SmartDashboard.putBoolean("Right 0",rightStick.getRawButton(Joystick.ButtonType.kTrigger.value));
 		SmartDashboard.putBoolean("Right 1",rightStick.getRawButton(Joystick.ButtonType.kTop.value));
 		SmartDashboard.putBoolean("Right 2",rightStick.getRawButton(Joystick.ButtonType.kNumButton.value));
