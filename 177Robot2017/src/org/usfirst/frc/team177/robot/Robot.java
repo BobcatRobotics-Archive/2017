@@ -41,8 +41,6 @@ public class Robot extends IterativeRobot {
 	/** Solenoids **/ 
 	public Solenoid shiftPneumatic = new Solenoid(0); /* For shifting */
 
-	final String defaultAuto = "Default";
-	final String customAuto = "My Auto";
 	SendableChooser<String> chooser = new SendableChooser<>();
 	
     long autoStartTime;
@@ -56,8 +54,10 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void robotInit() {
-		chooser.addDefault("Default Auto", defaultAuto);
-		chooser.addObject("My Auto", customAuto);
+		/** Add selections for autonoumous mode **/
+		chooser.addDefault("Mode 1", "m1");
+		chooser.addObject("Mode 2", "m2");
+		chooser.addObject("Mode 3a", "m3");
 		SmartDashboard.putData("Auto modes", chooser);
 
 		driveTrain.setLeftMotors(3, 4, 5);
@@ -66,9 +66,8 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
-		SmartDashboard.putString("Status","teleop mode initailized");
+		SmartDashboard.putString("Mode","teleop init");
 		shiftGears = false;
-		SmartDashboard.putString("GearStatus","gear status = " + shiftGears);
 	}
 	
 	/**
@@ -78,9 +77,6 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 		/** Display Joystick status **/
 		/** For testing only **/
-		SmartDashboard.putBoolean("Right 0",rightStick.getRawButton(Joystick.ButtonType.kTrigger.value));
-		SmartDashboard.putBoolean("Right 1",rightStick.getRawButton(Joystick.ButtonType.kTop.value));
-		SmartDashboard.putBoolean("Right 2",rightStick.getRawButton(Joystick.ButtonType.kNumButton.value));
 		
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value)  * INVERT_MOTOR;
@@ -107,16 +103,18 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
     	/** This is crazy reverse code just to test that test mode is working **/
      	/** Joysticks work on x axis (left to right) **/
-		/**
+
      	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value)  * INVERT_MOTOR;
  		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
  		driveTrain.drive(left, right);
- 		*/
 		
     }
     
     @Override
     public void autonomousInit() {    			
+		SmartDashboard.putString("Mode","autonomous init");
+		String autoMode = chooser.getSelected();
+		SmartDashboard.putString("Auto",autoMode);
   		autoStartTime = System.currentTimeMillis();
     }
     
