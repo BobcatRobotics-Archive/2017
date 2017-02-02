@@ -87,7 +87,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	private boolean checkPneumaticStatus() {
-		if (rightStick.getRawButton(Joystick.ButtonType.kTop.value)) {
+		if (leftStick.getRawButton(Joystick.ButtonType.kTop.value)) {
 			if (System.currentTimeMillis()-buttonStartTime > 1500L) {
 				shiftGears = !shiftGears;
 				buttonStartTime = System.currentTimeMillis();
