@@ -29,8 +29,8 @@ public class Robot extends IterativeRobot {
 	DriveChain driveTrain = new DriveChain();
 
 	/**Joysticks**/    
-	Joystick leftStick = new Joystick(0);
-	Joystick rightStick = new Joystick(1);
+	Joystick leftStick = new Joystick(1);
+	Joystick rightStick = new Joystick(0);
 	
 	/** Solenoids **/ 
 	public Solenoid shiftPneumatic = new Solenoid(0); /* For shifting */
@@ -53,7 +53,7 @@ public class Robot extends IterativeRobot {
 		
 		driveTrain.setRightMotors(3, 4, 5);
 		driveTrain.setLeftMotors(0, 1, 2);
-		driveTrain.setLeftMotorsReverse(true);
+		driveTrain.setLeftMotorsReverse(false);
 	}
 
 	@Override
