@@ -3,14 +3,17 @@ package org.usfirst.frc.team177.robot;
 import edu.wpi.first.wpilibj.Victor;
 
 public class DriveChain {
+	/** Inverts drive direction **/
+	private static final double INVERT_MOTOR = -1.0;
 	
-	Victor leftFront;
-	Victor leftMiddle;
-	Victor leftRear;
+	private Victor leftFront;
+	private Victor leftMiddle;
+	private Victor leftRear;
 	
-	Victor rightFront;
-	Victor rightMiddle;
-	Victor rightRear;
+	private Victor rightFront;
+	private Victor rightMiddle;
+	private Victor rightRear;
+	private boolean invertLeft = false;
 	
 	public DriveChain() {
 		super();
@@ -29,6 +32,11 @@ public class DriveChain {
 	}
 	
 	public void drive(double leftPower, double rightPower) {
+		if (invertLeft )
+			leftPower *= INVERT_MOTOR;
+		else
+			rightPower *= INVERT_MOTOR;
+		
 		leftFront.set(leftPower);
 		leftMiddle.set(leftPower);
 		leftRear.set(leftPower);
@@ -46,5 +54,9 @@ public class DriveChain {
 		rightFront.set(0.0);
 		rightMiddle.set(0.0);
 		rightRear.set(0.0);
+	}
+
+	public void setLeftMotorsReverse(boolean invert) {
+		invertLeft = invert;
 	}
 }

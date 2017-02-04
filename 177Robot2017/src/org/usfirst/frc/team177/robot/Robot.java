@@ -1,12 +1,8 @@
 package org.usfirst.frc.team177.robot;
 
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.SampleRobot;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -29,8 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
-	private static final double INVERT_MOTOR = -1.0;
-	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
 
@@ -44,30 +38,27 @@ public class Robot extends IterativeRobot {
 	SendableChooser<String> chooser = new SendableChooser<>();
 	
     long autoStartTime;
-    boolean shiftGears = false;
-    long buttonStartTime = System.currentTimeMillis();
 
 
 	public Robot() {
-		//myRobot.setExpiration(0.1);
 	}
 
 	@Override
 	public void robotInit() {
-		/** Add selections for autonoumous mode **/
+		/** Add selections for autonomous mode **/
 		chooser.addDefault("Mode 1", "m1");
 		chooser.addObject("Mode 2", "m2");
 		chooser.addObject("Mode 3a", "m3");
 		SmartDashboard.putData("Auto modes", chooser);
-
-		driveTrain.setLeftMotors(3, 4, 5);
-		driveTrain.setRightMotors(0, 1, 2);
+		
+		driveTrain.setRightMotors(3, 4, 5);
+		driveTrain.setLeftMotors(0, 1, 2);
+		driveTrain.setLeftMotorsReverse(true);
 	}
 
 	@Override
 	public void teleopInit() {
 		SmartDashboard.putString("Mode","teleop init");
-		shiftGears = false;
 	}
 	
 	/**
@@ -79,23 +70,13 @@ public class Robot extends IterativeRobot {
 		/** For testing only **/
 		
     	//Driving
-    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value)  * INVERT_MOTOR;
+    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 		
-		shiftPneumatic.set(checkPneumaticStatus());
+		shiftPneumatic.set(rightStick.getRawButton(3));
 	}
 
-	private boolean checkPneumaticStatus() {
-		if (rightStick.getRawButton(Joystick.ButtonType.kTop.value)) {
-			if (System.currentTimeMillis()-buttonStartTime > 1500L) {
-				shiftGears = !shiftGears;
-				buttonStartTime = System.currentTimeMillis();
-			}
-		}
-		
-		return shiftGears;
-	}
 	/**
      * This function is called periodically during test mode
      */
@@ -103,8 +84,7 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
     	/** This is crazy reverse code just to test that test mode is working **/
      	/** Joysticks work on x axis (left to right) **/
-
-     	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value)  * INVERT_MOTOR;
+     	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value);
  		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
  		driveTrain.drive(left, right);
 		
@@ -123,7 +103,7 @@ public class Robot extends IterativeRobot {
      */
     @Override
     public void autonomousPeriodic() {
-    	/** This is sample code just to test automonous mode **/
+    	/** This is sample code just to test autonomous mode **/
     	/** Code drive left motors for 2 sec, right motors for 2 secs, then stops */
     	long currentTime = System.currentTimeMillis();
     	long currentDuration = currentTime - autoStartTime;
