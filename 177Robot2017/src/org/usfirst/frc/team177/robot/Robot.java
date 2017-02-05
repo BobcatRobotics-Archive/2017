@@ -1,5 +1,8 @@
 package org.usfirst.frc.team177.robot;
 
+import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -24,6 +27,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * instead if you're new.
  */
 public class Robot extends IterativeRobot {
+	
+	CANTalon _talon = new CANTalon(1);
 	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
@@ -54,6 +59,10 @@ public class Robot extends IterativeRobot {
 		driveTrain.setRightMotors(3, 4, 5);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
+		
+		/** Testing Talon */
+    	_talon.changeControlMode(TalonControlMode.PercentVbus);
+
 	}
 
 	@Override
@@ -62,7 +71,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	/**
-     * This function is called periodically during operator controll
+     * This function is called periodically during operator control
      */
 	@Override
     public void teleopPeriodic() {
@@ -70,11 +79,16 @@ public class Robot extends IterativeRobot {
 		/** For testing only **/
 		
     	//Driving
+		/**
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 		
 		shiftPneumatic.set(rightStick.getRawButton(3));
+		*/
+    	/* Percent voltage mode */
+    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
+    	_talon.set(left);
 	}
 
 	/**
