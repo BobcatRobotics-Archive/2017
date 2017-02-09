@@ -1,8 +1,5 @@
 package org.usfirst.frc.team177.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.TalonControlMode;
-
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -27,8 +24,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * instead if you're new.
  */
 public class Robot extends IterativeRobot {
+	private final String AUTO_FULL = "afull";
+	private final String AUTO_RAMP = "aramp";
 	
-	CANTalon _talon = new CANTalon(1);
+	Talon talon1 = new Talon(1,false);
+	Talon talon2 = new Talon(2,true);
 	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
@@ -38,12 +38,14 @@ public class Robot extends IterativeRobot {
 	Joystick rightStick = new Joystick(0);
 	
 	/** Solenoids **/ 
-	public Solenoid shiftPneumatic = new Solenoid(0); /* For shifting */
+	public Solenoid shifter = new Solenoid(0); /* For shifting */
 
 	SendableChooser<String> chooser = new SendableChooser<>();
 	
     long autoStartTime;
-
+    boolean automode = true;
+    String autoMode = null;
+	private boolean setSpeed = true;
 
 	public Robot() {
 	}
@@ -51,18 +53,13 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		/** Add selections for autonomous mode **/
-		chooser.addDefault("Mode 1", "m1");
-		chooser.addObject("Mode 2", "m2");
-		chooser.addObject("Mode 3a", "m3");
+		chooser.addDefault("Auto - Full Speed", AUTO_FULL);
+		chooser.addObject("Auto - Ramped Speed", AUTO_RAMP);
 		SmartDashboard.putData("Auto modes", chooser);
 		
 		driveTrain.setRightMotors(3, 4, 5);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
-		
-		/** Testing Talon */
-    	_talon.changeControlMode(TalonControlMode.PercentVbus);
-
 	}
 
 	@Override
@@ -79,16 +76,23 @@ public class Robot extends IterativeRobot {
 		/** For testing only **/
 		
     	//Driving
-		/**
+		
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 		
-		shiftPneumatic.set(rightStick.getRawButton(3));
-		*/
+		shifter.set(rightStick.getRawButton(3));
+		
     	/* Percent voltage mode */
+		/**
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
-    	_talon.set(left);
+    	talon1.setSpeed(left);
+    	
+    	if (setSpeed) {
+    		setSpeed = false;
+    		talon2.setSpeed(500); 
+    	}
+		*/
 	}
 
 	/**
@@ -107,9 +111,10 @@ public class Robot extends IterativeRobot {
     @Override
     public void autonomousInit() {    			
 		SmartDashboard.putString("Mode","autonomous init");
-		String autoMode = chooser.getSelected();
-		SmartDashboard.putString("Auto",autoMode);
   		autoStartTime = System.currentTimeMillis();
+ 		autoMode = chooser.getSelected();
+		SmartDashboard.putString("Auto",autoMode);
+  		
     }
     
     /**
@@ -117,22 +122,46 @@ public class Robot extends IterativeRobot {
      */
     @Override
     public void autonomousPeriodic() {
-    	/** This is sample code just to test autonomous mode **/
-    	/** Code drive left motors for 2 sec, right motors for 2 secs, then stops */
     	long currentTime = System.currentTimeMillis();
-    	long currentDuration = currentTime - autoStartTime;
-    	
-    	if (currentDuration < 2000L ) {
-    		driveTrain.drive(1.0,0.0);
-    	}
-    	else
-    	if (currentDuration < 4000L ) {
-    		driveTrain.drive(0.0,1.0);
-    	}
-    	else
-		if (currentDuration > 6000L ) {
+    	long currentDuration = currentTime - autoStartTime;		
+		
+		if (AUTO_FULL.equals(autoMode)) {
+			autoFull(currentDuration);
+		} else {
+			autoRamp(currentDuration);
+		}
+      }
+
+    public void autoFull (long currentDuration) {
+   
+     	if (currentDuration < 2000L ) {
+    		driveTrain.drive(1.0,1.0);
+    	} else {
     		driveTrain.stop();
        }
-   }
-
+   	
+    }
+    
+    public void autoRamp (long currentDuration) {
+    	   
+     	if (currentDuration < 250L ) {
+    		driveTrain.drive(0.2,0.2);
+    	}
+    	else
+    	if (currentDuration < 500L ) {
+    		driveTrain.drive(0.3,0.3);
+    	}
+    	else
+    	if (currentDuration < 750L ) {
+    		driveTrain.drive(0.4,0.4);
+    	}
+    	else
+    	if (currentDuration < 1000L ) {
+    		driveTrain.drive(0.5,0.5);
+    	}
+    	else
+ 		if (currentDuration > 3000L ) {
+    		driveTrain.stop();
+       }
+    }
 }
