@@ -1,5 +1,7 @@
 package org.usfirst.frc.team177.robot;
 
+import org.usfirst.frc.team177.lib.RioLogger;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -27,8 +29,6 @@ public class Robot extends IterativeRobot {
 	private final String AUTO_FULL = "afull";
 	private final String AUTO_RAMP = "aramp";
 	
-	Talon talon1 = new Talon(1,false);
-	Talon talon2 = new Talon(2,true);
 	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
@@ -39,27 +39,36 @@ public class Robot extends IterativeRobot {
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
+	
+	/** GrayHill Encoders **/
+	GrayHill rightEnc = null;
+	GrayHill leftEnc = null;
+
+	/** Talon */
+	Talon talon1 = null;
+	Talon talon2 = null;
 
 	SendableChooser<String> chooser = new SendableChooser<>();
-	
-    long autoStartTime;
-    boolean automode = true;
-    String autoMode = null;
-	private boolean setSpeed = true;
+	RioLogger logger = new RioLogger();
+	//private boolean setSpeed = true;
 
 	public Robot() {
 	}
 
 	@Override
 	public void robotInit() {
-		/** Add selections for autonomous mode **/
-		chooser.addDefault("Auto - Full Speed", AUTO_FULL);
-		chooser.addObject("Auto - Ramped Speed", AUTO_RAMP);
-		SmartDashboard.putData("Auto modes", chooser);
-		
 		driveTrain.setRightMotors(3, 4, 5);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
+		
+		rightEnc = new GrayHill(0,1);
+		leftEnc = new GrayHill(2,3,true);
+
+		talon1 = new Talon(1,false);
+		talon2 = new Talon(2,true);
+
+		initSmartDashboard();
+		
 	}
 
 	@Override
@@ -107,6 +116,18 @@ public class Robot extends IterativeRobot {
  		driveTrain.drive(left, right);
 		
     }
+	
+	/** Variables used to control Automous mode */
+	private static final long SAMPLE_RATE = 100L; /* 100 milliseconds = .1 seconds */
+	private static final double INCREASE_CORRECTION = 1.02;
+	private static final double DECREASE_CORRECTION = 0.98;
+	private double left_power = 0.5;
+	private double right_power = 0.5;
+	private int sample_loop = 1;
+	private long autoStartTime;
+	private boolean automode = true;
+	private String autoMode = null;
+
     
     @Override
     public void autonomousInit() {    			
@@ -114,7 +135,12 @@ public class Robot extends IterativeRobot {
   		autoStartTime = System.currentTimeMillis();
  		autoMode = chooser.getSelected();
 		SmartDashboard.putString("Auto",autoMode);
-  		
+		
+		leftEnc.reset();
+		rightEnc.reset();
+		left_power = 0.5;
+		right_power = 0.5;
+		automode = true;
     }
     
     /**
@@ -124,6 +150,19 @@ public class Robot extends IterativeRobot {
     public void autonomousPeriodic() {
     	long currentTime = System.currentTimeMillis();
     	long currentDuration = currentTime - autoStartTime;		
+    	
+		/** Smart Dashboard  Encoder Values */
+		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
+		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
+		SmartDashboard.putNumber("Enc 1 Rate", leftEnc.getRate());	
+		SmartDashboard.putNumber("Enc 2 Raw ", rightEnc.getRaw());	
+		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
+		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
+		SmartDashboard.putNumber("Auto LP", left_power);	
+		SmartDashboard.putNumber("Auto RP", right_power);	
+		SmartDashboard.putNumber("Sample", sample_loop);	
+
+   	
 		
 		if (AUTO_FULL.equals(autoMode)) {
 			autoFull(currentDuration);
@@ -133,15 +172,39 @@ public class Robot extends IterativeRobot {
       }
 
     public void autoFull (long currentDuration) {
-   
-     	if (currentDuration < 2000L ) {
-    		driveTrain.drive(1.0,1.0);
+    	if (automode) {
+	    	if (currentDuration > (SAMPLE_RATE * sample_loop)) {
+	    		double ld = leftEnc.getDistance();
+	    		double rd = rightEnc.getDistance();
+	    		sample_loop++;
+	    		//logger.log(format(ld,rd,right_power));
+	    		if (ld > rd) {
+	    			right_power *= INCREASE_CORRECTION;
+	    		} else 
+		   		if (ld < rd) {
+	    			right_power *= DECREASE_CORRECTION;
+		   		}
+	    	}
+    	}
+     	if (currentDuration < 5000L ) {
+    		driveTrain.drive(left_power,right_power);
     	} else {
+    		automode = false;
     		driveTrain.stop();
        }
    	
     }
     
+    private String format(double ld,double rd,double rp) {
+    	StringBuffer sb = new StringBuffer();
+    	sb.append(ld);
+    	sb.append(" ");
+       	sb.append(rd);
+    	sb.append(" ");
+       	sb.append(rp);
+    	sb.append(" ");
+    	return sb.toString();
+    }
     public void autoRamp (long currentDuration) {
     	   
      	if (currentDuration < 250L ) {
@@ -164,4 +227,27 @@ public class Robot extends IterativeRobot {
     		driveTrain.stop();
        }
     }
+    
+    private void initSmartDashboard() {
+		/** Add selections for autonomous mode **/
+		chooser.addDefault("Auto - Full Speed", AUTO_FULL);
+		chooser.addObject("Auto - Ramped Speed", AUTO_RAMP);
+		SmartDashboard.putData("Auto modes", chooser);
+
+		SmartDashboard.putString("Mode","startup");
+
+		/** Encoder Values **/
+		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
+		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
+		SmartDashboard.putNumber("Enc 1 Rate", leftEnc.getRate());	
+		
+		SmartDashboard.putNumber("Enc 2 Raw ", rightEnc.getRaw());	
+		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
+		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
+
+		SmartDashboard.putNumber("Auto LP", left_power);	
+		SmartDashboard.putNumber("Auto RP", right_power);	
+		SmartDashboard.putNumber("Sample", sample_loop);	
+
+   }
 }
