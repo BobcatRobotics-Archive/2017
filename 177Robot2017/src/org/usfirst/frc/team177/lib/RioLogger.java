@@ -1,6 +1,7 @@
 package org.usfirst.frc.team177.lib;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,9 +9,18 @@ import java.util.Date;
 
 public class RioLogger {
 
-	private String filename = "/tmp/log/" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.txt'").format(new Date());
+	private String filename = "/home/lvuser/logs/" + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.txt'").format(new Date());
 	public RioLogger() {
 		super();
+		File newDir = new File("/home/lvuser/logs");
+		if (!newDir.exists()) {
+			try {
+				newDir.mkdir();
+			} catch (SecurityException e) {
+				System.out.print("Security exception " + e);
+			}
+			
+		}
 	}
 	
 	public void log(String line) {
@@ -27,6 +37,7 @@ public class RioLogger {
 			outputStream.close();
 			
 		} catch (IOException e) {
+			System.out.print("Error writing log " + e);
 			e.printStackTrace();				
 		}
 	}

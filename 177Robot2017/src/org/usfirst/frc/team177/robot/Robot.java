@@ -162,8 +162,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Auto RP", right_power);	
 		SmartDashboard.putNumber("Sample", sample_loop);	
 
-   	
-		
 		if (AUTO_FULL.equals(autoMode)) {
 			autoFull(currentDuration);
 		} else {
@@ -177,7 +175,7 @@ public class Robot extends IterativeRobot {
 	    		double ld = leftEnc.getDistance();
 	    		double rd = rightEnc.getDistance();
 	    		sample_loop++;
-	    		//logger.log(format(ld,rd,right_power));
+	    		logger.log(format(ld,rd,right_power));
 	    		if (ld > rd) {
 	    			right_power *= INCREASE_CORRECTION;
 	    		} else 
