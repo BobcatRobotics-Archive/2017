@@ -22,6 +22,7 @@ public class Talon {
 		//this.isClosedLoop = isClosedLoop;
 		//this.canID = canID;
 		talon = new CANTalon(canID);
+		talon.enableBrakeMode(false); /* coast mode */
 		if (isClosedLoop) {
 			setClosedLoop();
 		}

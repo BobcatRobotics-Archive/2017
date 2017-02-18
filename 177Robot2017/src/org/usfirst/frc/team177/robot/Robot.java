@@ -1,6 +1,9 @@
 package org.usfirst.frc.team177.robot;
 
+import org.usfirst.frc.team177.auto.Autonomous;
+import org.usfirst.frc.team177.auto.DriveAway;
 import org.usfirst.frc.team177.auto.DropGear;
+import org.usfirst.frc.team177.auto.ShootFuel;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -27,8 +30,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * instead if you're new.
  */
 public class Robot extends IterativeRobot {
-	private final String AUTO_FULL = "afull";
-	private final String AUTO_RAMP = "aramp";
+	private final double SHOOTER_RPMS = 1000.0f;
+	private final String AUTO_GEAR = "agear";
+	private final String AUTO_SHOOT = "ashoot";
+	private final String AUTO_DRIVE = "adrive";
 	
 	
 	/** Drive Chain Motors **/
@@ -36,26 +41,32 @@ public class Robot extends IterativeRobot {
 
 	/**Joysticks**/    
 	Joystick leftStick = new Joystick(2);
-	Joystick rightStick = new Joystick(1);
-	Joystick gamePad = new Joystick(0);
+	Joystick rightStick = new Joystick(0);
+	Joystick gamePad = new Joystick(1);
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
+	public Solenoid caster = new Solenoid(1);  /* For engaging casters */
+	public Solenoid pickup = new Solenoid(2);  /* Kick out the pick up mechanism */
+	
 	
 	/** GrayHill Encoders **/
-	GrayHill rightEnc = null;
-	GrayHill leftEnc = null;
+	GrayHill rightEnc = new GrayHill(0,1);
+	GrayHill leftEnc =  new GrayHill(2,3,true);
 
 	/** Talon */
-	Talon talon1 = null;
-	Talon talon2 = null;
+	Talon shooterLeft1 = new Talon(1,true);
+	Talon shooterLeft2 = new Talon(2,true);
+	Talon shooterRight1 = new Talon(3,true);
+	Talon shooterRight2 = new Talon(4,true);
 	
 	/* Victor */
 	Victor climber = new Victor(7);
 	Victor grabber = new Victor(8);
+	Victor feeder = new Victor(9);
 	
 	/* Autonomous mode Class */
-	DropGear dropGear = null;
+	Autonomous autoClass = null;
 
 	SendableChooser<String> chooser = new SendableChooser<>();
 	//private boolean setSpeed = true;
@@ -65,18 +76,12 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void robotInit() {
+		initSmartDashboard();
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
 		
-		rightEnc = new GrayHill(0,1);
-		leftEnc = new GrayHill(2,3,true);
-
-		talon1 = new Talon(1,false);
-		talon2 = new Talon(2,true);
-
-		initSmartDashboard();
-		
+		pickup.set(true);
 	}
 
 	@Override
@@ -89,36 +94,56 @@ public class Robot extends IterativeRobot {
      */
 	@Override
     public void teleopPeriodic() {
-		/** Display Joystick status **/
-		/** For testing only **/
-		
     	//Driving
-		
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
-		
+
+		// Shifting 
 		shifter.set(rightStick.getRawButton(3));
+	
+		// Caster 
+		caster.set(leftStick.getRawButton(3));
 		
-		double climbAmt = gamePad.getRawAxis(Joystick.AxisType.kZ.value);
+		// Climbing
+		double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
 		if (climbAmt > 0) 
 			climbAmt = 0;
 		else if (climbAmt < -1)
 			climbAmt = -1.0;
-			
-			
 		climber.set(climbAmt);
 		
-    	/* Percent voltage mode */
-		/**
-    	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
-    	talon1.setSpeed(left);
-    	
-    	if (setSpeed) {
-    		setSpeed = false;
-    		talon2.setSpeed(500); 
-    	}
-		*/
+		// Feeder Balls 
+		double feederspeed = gamePad.getRawAxis(Joystick.AxisType.kY.value);
+		feeder.setSpeed(feederspeed);
+		
+		if (gamePad.getRawButton(7)) 
+			grabber.setSpeed(0.5);
+		else
+			grabber.setSpeed(0.0);
+		if (gamePad.getRawButton(5)) 
+			grabber.setSpeed(-0.5);
+		else
+			grabber.setSpeed(0.0);
+	
+		
+    	/* Shooting */
+		if (gamePad.getRawButton(8)) {
+			shooterLeft1.setSpeed(SHOOTER_RPMS);
+			shooterLeft2.setSpeed(SHOOTER_RPMS);
+			shooterRight1.setSpeed(SHOOTER_RPMS);
+			shooterRight2.setSpeed(SHOOTER_RPMS);
+		} else {
+			/** TODO:: Fix code to coast or break */
+			shooterLeft1.setSpeed(0.0);
+			shooterLeft2.setSpeed(0.0);
+		}
+		
+		// Emergency Button for pick up
+		if (gamePad.getRawButton(4)) {
+			pickup.set(false);
+			pickup.set(true);
+		}
 	}
 
 	/**
@@ -138,13 +163,26 @@ public class Robot extends IterativeRobot {
     @Override
     public void autonomousInit() {    			
 		SmartDashboard.putString("Mode","autonomous init");
-		SmartDashboard.putString("Auto",chooser.getSelected());
+		String amode = chooser.getSelected();
+		SmartDashboard.putString("Auto",amode);
 		
 		leftEnc.reset();
 		rightEnc.reset();
-		dropGear = new DropGear();
-		dropGear.setEncoders(leftEnc, rightEnc);
-		dropGear.setDrive(driveTrain);
+		
+		if(AUTO_GEAR.equals(amode)) {
+			autoClass = new DropGear();
+		}
+		else if(AUTO_SHOOT.equals(amode)) {
+			autoClass = new ShootFuel();
+		}
+		else if(AUTO_DRIVE.equals(amode)) {
+			autoClass = new DriveAway();
+		}
+	
+		autoClass.setEncoders(leftEnc, rightEnc);
+		autoClass.setDrive(driveTrain);
+		
+		autoClass.autoInit();
     }
     
     /**
@@ -153,8 +191,6 @@ public class Robot extends IterativeRobot {
     @Override
     public void autonomousPeriodic() {
     	
-		dropGear.autonomousPeriodic();
-
 		/** Smart Dashboard  Encoder Values */
 		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
 		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
@@ -162,18 +198,19 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Enc 2 Raw ", rightEnc.getRaw());	
 		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
 		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
-		SmartDashboard.putNumber("Auto LP", dropGear.getLeftPower());	
-		SmartDashboard.putNumber("Auto RP", dropGear.getRightPower());	
-      }
-
-
+		SmartDashboard.putNumber("Auto LP", autoClass.getLeftPower());	
+		SmartDashboard.putNumber("Auto RP", autoClass.getRightPower());	
+		
+		autoClass.autoPeriodic();
+    }
     
     private void initSmartDashboard() {
 		/** Add selections for autonomous mode **/
-		chooser.addDefault("Auto - Full Speed", AUTO_FULL);
-		chooser.addObject("Auto - Ramped Speed", AUTO_RAMP);
+		chooser.addDefault("Auto - Drop Gear", AUTO_GEAR);
+		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
+		chooser.addObject("Auto - Drive Away", AUTO_DRIVE);
 		SmartDashboard.putData("Auto modes", chooser);
-
+		SmartDashboard.putString("Drop Gear Distance", "90");
 		SmartDashboard.putString("Mode","startup");
 
 		/** Encoder Values **/

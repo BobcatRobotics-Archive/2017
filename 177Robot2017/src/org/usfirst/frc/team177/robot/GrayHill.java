@@ -16,7 +16,7 @@ public class GrayHill {
 
 	public GrayHill(int channel1, int channel2, boolean reverse)	{
 		this();
-		enc = new Encoder(channel1,channel2, reverse, Encoder.EncodingType.k4X);
+		enc = new Encoder(channel1,channel2, reverse, Encoder.EncodingType.k2X);
 		enc.setMaxPeriod(0.5);
 		enc.setMinRate(10.0);
 		enc.setDistancePerPulse(0.098175);
