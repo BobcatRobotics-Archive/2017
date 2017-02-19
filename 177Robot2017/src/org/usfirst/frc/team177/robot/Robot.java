@@ -81,12 +81,13 @@ public class Robot extends IterativeRobot {
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
 		
-		pickup.set(true);
 	}
 
 	@Override
 	public void teleopInit() {
 		SmartDashboard.putString("Mode","teleop init");
+		pickup.set(true);
+
 	}
 	
 	/**
@@ -137,7 +138,9 @@ public class Robot extends IterativeRobot {
 			/** TODO:: Fix code to coast or break */
 			shooterLeft1.setSpeed(0.0);
 			shooterLeft2.setSpeed(0.0);
-		}
+			shooterRight1.setSpeed(0.0);
+			shooterRight2.setSpeed(0.0);
+	}
 		
 		// Emergency Button for pick up
 		if (gamePad.getRawButton(4)) {
@@ -211,6 +214,7 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("Auto - Drive Away", AUTO_DRIVE);
 		SmartDashboard.putData("Auto modes", chooser);
 		SmartDashboard.putString("Drop Gear Distance", "90");
+		SmartDashboard.putString("Shooter Time", "5");
 		SmartDashboard.putString("Mode","startup");
 
 		/** Encoder Values **/

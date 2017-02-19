@@ -1,9 +1,5 @@
 package org.usfirst.frc.team177.auto;
 
-import org.usfirst.frc.team177.lib.RioLogger;
-import org.usfirst.frc.team177.robot.DriveChain;
-import org.usfirst.frc.team177.robot.GrayHill;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** 
@@ -17,34 +13,27 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class DropGear extends Autonomous {
 	private double distance;
 	private int sample_loop = 1;
-	private long autoStartTime;
 	private boolean automode;
-	//private String autoMode = null;
 
-	RioLogger logger = new RioLogger();
-	private GrayHill left;
-	private GrayHill right;
-	DriveChain drive;
-	
 	public DropGear() {
 		super();
 		
 		leftPower = 0.5;
 		rightPower = 0.5;
 		automode = true;
-  		autoStartTime = System.currentTimeMillis();
 	}
-	
+	/**
 	public void setDistance(double distance) {
 		this.distance = distance;
 	}
-
+	*/
+	@Override
 	public void autoInit() {
-		// TODO Auto-generated method stub
 		double gearDistance = SmartDashboard.getDouble("Drop Gear Distance");
 		this.distance = gearDistance;
 	}
-
+	
+	@Override
 	public void autoPeriodic() {
     	long currentTime = System.currentTimeMillis();
     	long currentDuration = currentTime - autoStartTime;	

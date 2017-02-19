@@ -11,20 +11,25 @@ public abstract class Autonomous {
 	private static final double DECREASE_CORRECTION = 0.98;
 	protected double leftPower;
 	protected double rightPower;
+	protected long autoStartTime;
 	//private double distance;
 	//private int sample_loop = 1;
-	//private long autoStartTime;
 	//private boolean automode;
 	// private String autoMode = null;
 
-	RioLogger logger = new RioLogger();
-	private GrayHill left;
-	private GrayHill right;
+	private RioLogger logger = new RioLogger();
+	protected GrayHill left;
+	protected GrayHill right;
 	DriveChain drive;
 
 	public abstract void autoInit();
 
 	public abstract void autoPeriodic();
+
+	public Autonomous() {
+		super();
+  		autoStartTime = System.currentTimeMillis();
+	}
 
 	public void setEncoders(GrayHill left, GrayHill right) {
 		this.left = left;
