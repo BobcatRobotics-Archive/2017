@@ -14,12 +14,13 @@ public class DropGear extends Autonomous {
 	private double distance;
 	private int sample_loop = 1;
 	private boolean automode;
+	private double drivingTime = 3000.0; /* 3 seconds */
 
 	public DropGear() {
 		super();
 		
-		leftPower = 0.5;
-		rightPower = 0.5;
+		leftPower = 0.60;
+		rightPower = 0.46;
 		automode = true;
 	}
 	/**
@@ -29,24 +30,29 @@ public class DropGear extends Autonomous {
 	*/
 	@Override
 	public void autoInit() {
-		double gearDistance = SmartDashboard.getDouble("Drop Gear Distance");
+		String dg= SmartDashboard.getString("Drop Gear Distance");
+		double gearDistance = new Double(dg);
 		this.distance = gearDistance;
+		logger.log("Drop gear distance is " + gearDistance);
+		left.reset();
+		right.reset();
+		prevLeftDistance = 0.0;
+		prevRightDistance = 0.0;
 	}
 	
 	@Override
 	public void autoPeriodic() {
     	long currentTime = System.currentTimeMillis();
     	long currentDuration = currentTime - autoStartTime;	
-		double ldist = left.getDistance();
-		double rdist = right.getDistance();
-    	
+   	
      	if (automode) {
 	    	if (currentDuration > (SAMPLE_RATE * sample_loop)) {
-	    		adjustDriveStraight(ldist,rdist);
+	    		adjustDriveStraight();
 	    		sample_loop++;
 	    	}
     	}
-     	if (ldist < distance && rdist < distance ) {
+     	if ((left.getDistance() < distance && right.getDistance() < distance ) &&
+     		(currentDuration < drivingTime))	{
     		drive.drive(leftPower,rightPower);
     	} else {
     		automode = false;
@@ -54,6 +60,4 @@ public class DropGear extends Autonomous {
        }
     }
 
-   
-  
 }

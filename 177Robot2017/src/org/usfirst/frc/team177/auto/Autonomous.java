@@ -6,18 +6,17 @@ import org.usfirst.frc.team177.robot.GrayHill;
 
 public abstract class Autonomous {
 
-	protected static final long SAMPLE_RATE = 50L; /** 50 milliseconds = 20 / seconds */
-	private static final double INCREASE_CORRECTION = 1.02;
-	private static final double DECREASE_CORRECTION = 0.98;
+	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20 / seconds */
+	private static final double INCREASE_CORRECTION = 1.05;
+	private static final double DECREASE_CORRECTION = 0.95;
+	private static double deadBandRange = 0.0;
+	protected double prevLeftDistance = 0.0;
+	protected double prevRightDistance = 0.0;
 	protected double leftPower;
 	protected double rightPower;
 	protected long autoStartTime;
-	//private double distance;
-	//private int sample_loop = 1;
-	//private boolean automode;
-	// private String autoMode = null;
 
-	private RioLogger logger = new RioLogger();
+	protected RioLogger logger = new RioLogger();
 	protected GrayHill left;
 	protected GrayHill right;
 	DriveChain drive;
@@ -28,7 +27,7 @@ public abstract class Autonomous {
 
 	public Autonomous() {
 		super();
-  		autoStartTime = System.currentTimeMillis();
+		autoStartTime = System.currentTimeMillis();
 	}
 
 	public void setEncoders(GrayHill left, GrayHill right) {
@@ -52,15 +51,37 @@ public abstract class Autonomous {
 		return String.format("%5.2f %5.2f %1.5f %1.5f", ld, rd, lp, rp);
 	}
 
-	protected void adjustDriveStraight(double ldist, double rdist) {
-		logger.log(format(ldist,rdist,leftPower,rightPower));
-		if (ldist > rdist) {
+	protected void adjustDriveStraight() {
+		double ldist = left.getDistance();
+		double rdist = right.getDistance();
+ 		logger.log(format(ldist,rdist,leftPower,rightPower));
+		
+		double leftdiff  = ldist - prevLeftDistance;
+		prevLeftDistance = ldist;
+		double rightdiff = rdist - prevRightDistance;
+		prevRightDistance = rdist;
+		
+		double ldistChk = Math.abs(leftdiff);
+		double rdistChk = Math.abs(rightdiff);
+		if (Math.abs(ldistChk - rdistChk) < deadBandRange) {
+			return;
+		}
+			
+		if (ldistChk > rdistChk) {
 			rightPower *= INCREASE_CORRECTION;
 			leftPower *= DECREASE_CORRECTION;
 		} else 
-   		if (ldist < rdist) {
+   		if (ldistChk < rdistChk) {
 			leftPower *= INCREASE_CORRECTION;
 			rightPower *= DECREASE_CORRECTION;
    		}  	
+		if (leftPower > 1.0) 
+			leftPower = 1.0;
+		else if (leftPower < -1.0) 
+			leftPower = -1.0;
+		if (rightPower > 1.0) 
+			rightPower = 1.0;
+		else if (rightPower < -1.0) 
+			rightPower = -1.0;
 	}
 }

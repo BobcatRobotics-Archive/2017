@@ -40,9 +40,9 @@ public class Robot extends IterativeRobot {
 	DriveChain driveTrain = new DriveChain();
 
 	/**Joysticks**/    
-	Joystick leftStick = new Joystick(2);
+	Joystick leftStick = new Joystick(1);
 	Joystick rightStick = new Joystick(0);
-	Joystick gamePad = new Joystick(1);
+	Joystick gamePad = new Joystick(3);
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
@@ -52,7 +52,7 @@ public class Robot extends IterativeRobot {
 	
 	/** GrayHill Encoders **/
 	GrayHill rightEnc = new GrayHill(0,1);
-	GrayHill leftEnc =  new GrayHill(2,3,true);
+	GrayHill leftEnc =  new GrayHill(2,3,false);
 
 	/** Talon */
 	Talon shooterLeft1 = new Talon(1,true);
@@ -87,7 +87,6 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		SmartDashboard.putString("Mode","teleop init");
 		pickup.set(true);
-
 	}
 	
 	/**
@@ -95,6 +94,9 @@ public class Robot extends IterativeRobot {
      */
 	@Override
     public void teleopPeriodic() {
+		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
+		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
+
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -107,11 +109,12 @@ public class Robot extends IterativeRobot {
 		caster.set(leftStick.getRawButton(3));
 		
 		// Climbing
-		double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
-		if (climbAmt > 0) 
-			climbAmt = 0;
-		else if (climbAmt < -1)
-			climbAmt = -1.0;
+		//double climbAmt = rightStick.getRawAxis(Joystick.AxisType.kX.value); 
+		double climbAmt = gamePad.getRawAxis(3) * -1.0; /** 3 - Z Rotate Axis **/
+		if (climbAmt > 1.0) 
+			climbAmt = 1.0;
+		else if (climbAmt < 0.0)
+			climbAmt = 0.0;
 		climber.set(climbAmt);
 		
 		// Feeder Balls 
@@ -174,6 +177,7 @@ public class Robot extends IterativeRobot {
 		
 		if(AUTO_GEAR.equals(amode)) {
 			autoClass = new DropGear();
+			//shifter.set(false);
 		}
 		else if(AUTO_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();

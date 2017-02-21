@@ -17,8 +17,10 @@ public class ShootFuel extends Autonomous {
 
 	@Override
 	public void autoInit() {
-		double shoot = SmartDashboard.getDouble("Shooter Time");
+		String sh = SmartDashboard.getString("Shooter Time");
+		double shoot = new Double(sh);
 		this.shootTime = shoot;
+		logger.log("Shooter Time  is " + shoot);
 	}
 
 	@Override
