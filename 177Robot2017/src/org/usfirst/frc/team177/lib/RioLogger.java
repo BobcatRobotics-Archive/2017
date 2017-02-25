@@ -8,12 +8,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RioLogger {
-	private String filename = "/home/lvuser/logs/"
-			+ new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.txt'").format(new Date());
+	private String path =  File.separator + "home" + File.separator + "lvuser" + File.separator + "logs";
+	private String filename =path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.txt'").format(new Date());
+	private static RioLogger singleton;
 
-	public RioLogger() {
+	/* Create private constructor */
+	private RioLogger() {
 		super();
 		createLogDirectory();
+	}
+
+	/* Create a static method to get instance. */
+	public static RioLogger getInstance() {
+		if (singleton == null) {
+			singleton = new RioLogger();
+		}
+		return singleton;
 	}
 
 	public void log(String line) {
@@ -34,7 +44,7 @@ public class RioLogger {
 	}
 
 	private void createLogDirectory() {
-		File newDir = new File("/home/lvuser/logs");
+		File newDir = new File(path);
 		if (!newDir.exists()) {
 			try {
 				newDir.mkdir();
@@ -43,5 +53,4 @@ public class RioLogger {
 			}
 		}
 	}
-
 }

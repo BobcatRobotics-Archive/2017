@@ -4,6 +4,8 @@ import org.usfirst.frc.team177.auto.Autonomous;
 import org.usfirst.frc.team177.auto.DriveAway;
 import org.usfirst.frc.team177.auto.DropGear;
 import org.usfirst.frc.team177.auto.ShootFuel;
+import org.usfirst.frc.team177.lib.RioLogger;
+import org.usfirst.frc.team177.lib.RioLoggerThread;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -30,11 +32,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * instead if you're new.
  */
 public class Robot extends IterativeRobot {
-	private final double SHOOTER_RPMS = 1000.0f;
+	private  double SHOOTER_RPMS = 1000.0f;
 	private final String AUTO_GEAR = "agear";
 	private final String AUTO_SHOOT = "ashoot";
 	private final String AUTO_DRIVE = "adrive";
 	
+	private RioLogger logger;
 	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
@@ -42,7 +45,7 @@ public class Robot extends IterativeRobot {
 	/**Joysticks**/    
 	Joystick leftStick = new Joystick(1);
 	Joystick rightStick = new Joystick(0);
-	Joystick gamePad = new Joystick(3);
+	Joystick gamePad = new Joystick(2);
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
@@ -77,16 +80,40 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		initSmartDashboard();
+		logger = RioLogger.getInstance();
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
 		
 	}
 
+    @Override
+	public void disabledPeriodic(){
+    	//logger.stopLogging();
+	}
+    
+	/* A quick hack to test shooters */
+	double ff;
+	/* End hack */
+	
 	@Override
 	public void teleopInit() {
 		SmartDashboard.putString("Mode","teleop init");
 		pickup.set(true);
+		logger = RioLogger.getInstance();
+		//logger.setLoggingParameters(15000, 15);
+				
+		// Read PID Parameters
+		ff = new Double(SmartDashboard.getString("PID FF"));
+		double p = new Double(SmartDashboard.getString("PID P"));
+		double i = new Double(SmartDashboard.getString("PID I"));
+		double d = new Double(SmartDashboard.getString("PID D"));
+		shooterLeft1.setPIDParameters(ff, p, i, d);
+		shooterLeft2.setPIDParameters(ff, p, i, d);
+		
+		SHOOTER_RPMS = new Double(SmartDashboard.getString("Shooter RPM"));
+		logger.log("RPM = " + SHOOTER_RPMS);
+
 	}
 	
 	/**
@@ -96,7 +123,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
 		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
-
+		logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -110,25 +137,24 @@ public class Robot extends IterativeRobot {
 		
 		// Climbing
 		//double climbAmt = rightStick.getRawAxis(Joystick.AxisType.kX.value); 
-		double climbAmt = gamePad.getRawAxis(3) * -1.0; /** 3 - Z Rotate Axis **/
-		if (climbAmt > 1.0) 
-			climbAmt = 1.0;
-		else if (climbAmt < 0.0)
+		double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
+		SmartDashboard.putNumber("climber", climbAmt);
+		if (climbAmt > 0.0) 
 			climbAmt = 0.0;
+		else if (climbAmt < -1.0)
+			climbAmt = -1.0;
 		climber.set(climbAmt);
 		
 		// Feeder Balls 
 		double feederspeed = gamePad.getRawAxis(Joystick.AxisType.kY.value);
 		feeder.setSpeed(feederspeed);
 		
+		grabber.setSpeed(0.0);
 		if (gamePad.getRawButton(7)) 
-			grabber.setSpeed(0.5);
-		else
-			grabber.setSpeed(0.0);
-		if (gamePad.getRawButton(5)) 
 			grabber.setSpeed(-0.5);
 		else
-			grabber.setSpeed(0.0);
+		if (gamePad.getRawButton(5)) 
+			grabber.setSpeed(0.5);
 	
 		
     	/* Shooting */
@@ -139,8 +165,8 @@ public class Robot extends IterativeRobot {
 			shooterRight2.setSpeed(SHOOTER_RPMS);
 		} else {
 			/** TODO:: Fix code to coast or break */
-			shooterLeft1.setSpeed(0.0);
-			shooterLeft2.setSpeed(0.0);
+			shooterLeft1.stop();
+			shooterLeft2.stop();
 			shooterRight1.setSpeed(0.0);
 			shooterRight2.setSpeed(0.0);
 	}
@@ -219,8 +245,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto modes", chooser);
 		SmartDashboard.putString("Drop Gear Distance", "90");
 		SmartDashboard.putString("Shooter Time", "5");
-		SmartDashboard.putString("Mode","startup");
-
+		SmartDashboard.putString("Shooter RPM", "2700");
+		
 		/** Encoder Values **/
 		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
 		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
@@ -231,7 +257,14 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
 
 		SmartDashboard.putNumber("Auto LP", 0.0);	
-		SmartDashboard.putNumber("Auto RP", 0.0);	
+		SmartDashboard.putNumber("Auto RP", 0.0);
+		
+		SmartDashboard.putNumber("climber", 0.0);
+		SmartDashboard.putString("PID FF", "0.028");
+		SmartDashboard.putString("PID P", "0.0015");
+		SmartDashboard.putString("PID I", "0.0");
+		SmartDashboard.putString("PID D", "0.0");
+
 
    }
 }

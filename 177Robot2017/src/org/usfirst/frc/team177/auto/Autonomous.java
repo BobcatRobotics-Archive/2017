@@ -1,6 +1,7 @@
 package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.lib.RioLogger;
+import org.usfirst.frc.team177.lib.RioLoggerThread;
 import org.usfirst.frc.team177.robot.DriveChain;
 import org.usfirst.frc.team177.robot.GrayHill;
 
@@ -16,7 +17,7 @@ public abstract class Autonomous {
 	protected double rightPower;
 	protected long autoStartTime;
 
-	protected RioLogger logger = new RioLogger();
+	protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected GrayHill left;
 	protected GrayHill right;
 	DriveChain drive;

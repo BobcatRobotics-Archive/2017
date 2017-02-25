@@ -8,9 +8,12 @@ public class Talon {
 
 	private CANTalon talon;
 
-	//private boolean isClosedLoop;
+	private boolean isClosedLoop;
+	private double feedForward = 0.1097;
+	private double pidP = 0.22;
+	private double pidI = 0.0;
+	private double pidD = 0.0;
 	//private int canID;
-	
 	
 	private Talon() {
 		super();
@@ -19,7 +22,7 @@ public class Talon {
 
 	public Talon(int canID,boolean isClosedLoop) {
 		this();
-		//this.isClosedLoop = isClosedLoop;
+		this.isClosedLoop = isClosedLoop;
 		//this.canID = canID;
 		talon = new CANTalon(canID);
 		talon.enableBrakeMode(false); /* coast mode */
@@ -47,13 +50,38 @@ public class Talon {
 		talon.configPeakOutputVoltage(+12.0f, -12.0f);
 	    /* set closed loop gains in slot0 */
 		talon.setProfile(0);
-		talon.setF(0.1097);
-		talon.setP(0.22);
-		talon.setI(0); 
-		talon.setD(0);
+		talon.setF(feedForward);
+		talon.setP(pidP);
+		talon.setI(pidI); 
+		talon.setD(pidD);
 	}
 	
 	public void setSpeed(double speed) {
+		//if (isClosedLoop)
+		//	speed /= 600.0;
 		talon.set(speed);
+	}
+	
+	public double getSpeed() {
+		return talon.getSpeed();
+	}
+	
+	public void stop() {
+		talon.set(0.0);
+		//talon.stopMotor();
+	}
+	
+	public void setPIDParameters(double feedForward,double P, double I, double D) {
+		this.feedForward = feedForward;
+		this.pidP = P;
+		this.pidI = I;
+		this.pidD = D;
+		//talon.reset();
+		talon.setF(feedForward);
+		talon.setP(pidP);
+		talon.setI(pidI); 
+		talon.setD(pidD);
+		
+
 	}
 }
