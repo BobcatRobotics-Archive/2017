@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
 	/**Joysticks**/    
 	Joystick leftStick = new Joystick(1);
 	Joystick rightStick = new Joystick(0);
-	Joystick gamePad = new Joystick(3);
+	Joystick gamePad = new Joystick(2);
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
