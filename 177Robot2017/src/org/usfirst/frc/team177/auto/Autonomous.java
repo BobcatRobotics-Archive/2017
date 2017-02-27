@@ -2,6 +2,7 @@ package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.lib.RioLogger;
 import org.usfirst.frc.team177.lib.RioLoggerThread;
+import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.DriveChain;
 import org.usfirst.frc.team177.robot.GrayHill;
 
@@ -15,7 +16,8 @@ public abstract class Autonomous {
 	protected double prevRightDistance = 0.0;
 	protected double leftPower;
 	protected double rightPower;
-	protected long autoStartTime;
+	protected StopWatch watch = new StopWatch(SAMPLE_RATE);
+	//protected long autoStartTime;
 
 	protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected GrayHill left;
@@ -28,7 +30,7 @@ public abstract class Autonomous {
 
 	public Autonomous() {
 		super();
-		autoStartTime = System.currentTimeMillis();
+		//autoStartTime = System.currentTimeMillis();
 	}
 
 	public void setEncoders(GrayHill left, GrayHill right) {

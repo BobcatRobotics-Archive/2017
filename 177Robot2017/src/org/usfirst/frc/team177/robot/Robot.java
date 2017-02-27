@@ -1,6 +1,7 @@
 package org.usfirst.frc.team177.robot;
 
 import org.usfirst.frc.team177.auto.Autonomous;
+import org.usfirst.frc.team177.auto.DoNothing;
 import org.usfirst.frc.team177.auto.DriveAway;
 import org.usfirst.frc.team177.auto.DropGear;
 import org.usfirst.frc.team177.auto.ShootFuel;
@@ -36,6 +37,8 @@ public class Robot extends IterativeRobot {
 	private final String AUTO_GEAR = "agear";
 	private final String AUTO_SHOOT = "ashoot";
 	private final String AUTO_DRIVE = "adrive";
+	private final String AUTO_NOTHING = "anothing";
+	
 	
 	private RioLogger logger;
 	
@@ -174,8 +177,12 @@ public class Robot extends IterativeRobot {
 		// Emergency Button for pick up
 		if (gamePad.getRawButton(4)) {
 			pickup.set(false);
+		}
+		// Emergency Button for pick up
+		if (gamePad.getRawButton(3)) {
 			pickup.set(true);
 		}
+
 	}
 
 	/**
@@ -209,12 +216,16 @@ public class Robot extends IterativeRobot {
 			autoClass = new ShootFuel();
 		}
 		else if(AUTO_DRIVE.equals(amode)) {
-			autoClass = new DriveAway();
+			DriveAway auto = new DriveAway();
+			auto.setPicker(pickup);
+			auto.setGrabber(grabber);
+			autoClass = auto;
+		} else {
+			autoClass = new DoNothing();
 		}
 	
 		autoClass.setEncoders(leftEnc, rightEnc);
 		autoClass.setDrive(driveTrain);
-		
 		autoClass.autoInit();
     }
     
@@ -242,6 +253,7 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Auto - Drop Gear", AUTO_GEAR);
 		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
 		chooser.addObject("Auto - Drive Away", AUTO_DRIVE);
+		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
 		SmartDashboard.putData("Auto modes", chooser);
 		SmartDashboard.putString("Drop Gear Distance", "90");
 		SmartDashboard.putString("Shooter Time", "5");
