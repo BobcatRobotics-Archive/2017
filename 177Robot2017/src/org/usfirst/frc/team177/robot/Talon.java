@@ -1,5 +1,7 @@
 package org.usfirst.frc.team177.robot;
 
+import org.usfirst.frc.team177.lib.SmartPID;
+
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
@@ -8,12 +10,12 @@ public class Talon {
 
 	private CANTalon talon;
 
-	private boolean isClosedLoop;
+	//private boolean isClosedLoop;
+	//private int canID;
 	private double feedForward = 0.1097;
 	private double pidP = 0.22;
 	private double pidI = 0.0;
 	private double pidD = 0.0;
-	//private int canID;
 	
 	private Talon() {
 		super();
@@ -22,7 +24,7 @@ public class Talon {
 
 	public Talon(int canID,boolean isClosedLoop) {
 		this();
-		this.isClosedLoop = isClosedLoop;
+		//this.isClosedLoop = isClosedLoop;
 		//this.canID = canID;
 		talon = new CANTalon(canID);
 		talon.enableBrakeMode(false); /* coast mode */
@@ -71,17 +73,15 @@ public class Talon {
 		//talon.stopMotor();
 	}
 	
-	public void setPIDParameters(double feedForward,double P, double I, double D) {
-		this.feedForward = feedForward;
-		this.pidP = P;
-		this.pidI = I;
-		this.pidD = D;
-		//talon.reset();
+	public void setPIDParameters(SmartPID pid)  {
+		feedForward = pid.getFF();
+		pidP = pid.getP();
+		pidI = pid.getI();
+		pidD = pid.getD();
+		
 		talon.setF(feedForward);
 		talon.setP(pidP);
 		talon.setI(pidI); 
 		talon.setD(pidD);
-		
-
 	}
 }

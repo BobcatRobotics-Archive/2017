@@ -1,7 +1,7 @@
 package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.lib.RioLogger;
-import org.usfirst.frc.team177.lib.RioLoggerThread;
+import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.DriveChain;
 import org.usfirst.frc.team177.robot.GrayHill;
@@ -19,7 +19,9 @@ public abstract class Autonomous {
 	protected StopWatch watch = new StopWatch(SAMPLE_RATE);
 	//protected long autoStartTime;
 
-	protected RioLoggerThread logger = RioLoggerThread.getInstance();
+	//protected RioLoggerThread logger = RioLoggerThread.getInstance();
+	protected RioLogger logger = RioLogger.getInstance();
+	protected SmartDash dashboard = SmartDash.getInstance();
 	protected GrayHill left;
 	protected GrayHill right;
 	DriveChain drive;

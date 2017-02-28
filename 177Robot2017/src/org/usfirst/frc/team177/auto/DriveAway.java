@@ -4,7 +4,6 @@ import org.usfirst.frc.team177.lib.StopWatch;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This autonomous class drives straight for 3 seconds
@@ -31,10 +30,8 @@ public class DriveAway extends Autonomous {
 
 	@Override
 	public void autoInit() {
-		String dg= SmartDashboard.getString("Drop Gear Distance");
-		double gearDistance = new Double(dg);
-		this.distance = gearDistance;
-		logger.log("Drop gear distance is " + gearDistance);
+		distance = dashboard.getGearDistance();
+		logger.log("Drop gear distance is " + distance);
 		left.reset();
 		right.reset();
 		prevLeftDistance = 0.0;

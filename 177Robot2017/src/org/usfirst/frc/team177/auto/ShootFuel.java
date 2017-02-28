@@ -2,8 +2,6 @@ package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.robot.Talon;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class ShootFuel extends Autonomous {
 	private Talon shooterLeft1;
 	private Talon shooterLeft2;
@@ -15,12 +13,10 @@ public class ShootFuel extends Autonomous {
 
 	@Override
 	public void autoInit() {
-		String sh = SmartDashboard.getString("Shooter Time");
-		shootTime = new Double(sh);
+		shootTime = dashboard.getShooterTime();
 		logger.log("Shooter Time  is " + shootTime);
 		
-		sh = SmartDashboard.getString("Shooter RPM");
-		shooterRPM = new Long(sh);
+		shooterRPM = dashboard.getShooterRPM();
 		logger.log("Shooter RPM " + shooterRPM );
 		
 		// Set Timers

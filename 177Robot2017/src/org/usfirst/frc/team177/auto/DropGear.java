@@ -2,8 +2,6 @@ package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.lib.StopWatch;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 /**
  * This class is used in Autonomous Mode to drive straight to the gear drop
  * station and drop the gear
@@ -29,10 +27,9 @@ public class DropGear extends Autonomous {
 	 */
 	@Override
 	public void autoInit() {
-		String dg = SmartDashboard.getString("Drop Gear Distance");
-		double gearDistance = new Double(dg);
-		this.distance = gearDistance;
-		logger.log("Drop gear distance is " + gearDistance);
+		distance = dashboard.getGearDistance();
+		logger.log("Drop gear distance is " + distance);
+		
 		left.reset();
 		right.reset();
 		prevLeftDistance = 0.0;

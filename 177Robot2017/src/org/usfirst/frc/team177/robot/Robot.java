@@ -6,14 +6,13 @@ import org.usfirst.frc.team177.auto.DriveAway;
 import org.usfirst.frc.team177.auto.DropGear;
 import org.usfirst.frc.team177.auto.ShootFuel;
 import org.usfirst.frc.team177.lib.RioLogger;
-import org.usfirst.frc.team177.lib.RioLoggerThread;
+import org.usfirst.frc.team177.lib.SmartDash;
+import org.usfirst.frc.team177.lib.SmartPID;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This is a demo program showing the use of the RobotDrive class. The
@@ -33,19 +32,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * instead if you're new.
  */
 public class Robot extends IterativeRobot {
-	private  double SHOOTER_RPMS = 1000.0f;
-	private final String AUTO_GEAR = "agear";
-	private final String AUTO_SHOOT = "ashoot";
-	private final String AUTO_DRIVE = "adrive";
-	private final String AUTO_NOTHING = "anothing";
+	private SmartDash dashboard = SmartDash.getInstance();
+	private RioLogger logger = RioLogger.getInstance();
 	
-	
-	private RioLogger logger;
+	/* Autonomous mode Class */
+	Autonomous autoClass = null;
 	
 	/** Drive Chain Motors **/
 	DriveChain driveTrain = new DriveChain();
 
-	/**Joysticks**/    
+	/** Joysticks **/    
 	Joystick leftStick = new Joystick(1);
 	Joystick rightStick = new Joystick(0);
 	Joystick gamePad = new Joystick(2);
@@ -54,7 +50,6 @@ public class Robot extends IterativeRobot {
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
 	public Solenoid caster = new Solenoid(1);  /* For engaging casters */
 	public Solenoid pickup = new Solenoid(2);  /* Kick out the pick up mechanism */
-	
 	
 	/** GrayHill Encoders **/
 	GrayHill rightEnc = new GrayHill(0,1);
@@ -71,23 +66,21 @@ public class Robot extends IterativeRobot {
 	Victor grabber = new Victor(8);
 	Victor feeder = new Victor(9);
 	
-	/* Autonomous mode Class */
-	Autonomous autoClass = null;
 
-	SendableChooser<String> chooser = new SendableChooser<>();
-	//private boolean setSpeed = true;
+	/* Variables used in teleop */
+	private double shooterRPM = 0.0;
+	private SmartPID pid;
+
 
 	public Robot() {
 	}
 
 	@Override
 	public void robotInit() {
-		initSmartDashboard();
-		logger = RioLogger.getInstance();
+		dashboard.init();
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
-		
 	}
 
     @Override
@@ -95,27 +88,20 @@ public class Robot extends IterativeRobot {
     	//logger.stopLogging();
 	}
     
-	/* A quick hack to test shooters */
-	double ff;
-	/* End hack */
-	
 	@Override
 	public void teleopInit() {
-		SmartDashboard.putString("Mode","teleop init");
+		dashboard.setMode("teleop init");
 		pickup.set(true);
-		logger = RioLogger.getInstance();
-		//logger.setLoggingParameters(15000, 15);
 				
 		// Read PID Parameters
-		ff = new Double(SmartDashboard.getString("PID FF"));
-		double p = new Double(SmartDashboard.getString("PID P"));
-		double i = new Double(SmartDashboard.getString("PID I"));
-		double d = new Double(SmartDashboard.getString("PID D"));
-		shooterLeft1.setPIDParameters(ff, p, i, d);
-		shooterLeft2.setPIDParameters(ff, p, i, d);
+		pid = dashboard.getPID();
+		shooterLeft1.setPIDParameters(pid);
+		shooterLeft2.setPIDParameters(pid);
+		shooterRight1.setPIDParameters(pid);
+		shooterRight2.setPIDParameters(pid);
 		
-		SHOOTER_RPMS = new Double(SmartDashboard.getString("Shooter RPM"));
-		logger.log("RPM = " + SHOOTER_RPMS);
+		shooterRPM = dashboard.getShooterRPM();
+		logger.log("RPM = " + shooterRPM);
 
 	}
 	
@@ -124,9 +110,10 @@ public class Robot extends IterativeRobot {
      */
 	@Override
     public void teleopPeriodic() {
-		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
-		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
+		dashboard.setLeftEncoder(leftEnc);
+		dashboard.setRightEncoder(rightEnc);
 		logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
+		
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -141,7 +128,7 @@ public class Robot extends IterativeRobot {
 		// Climbing
 		//double climbAmt = rightStick.getRawAxis(Joystick.AxisType.kX.value); 
 		double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
-		SmartDashboard.putNumber("climber", climbAmt);
+		dashboard.setClimber(climbAmt);
 		if (climbAmt > 0.0) 
 			climbAmt = 0.0;
 		else if (climbAmt < -1.0)
@@ -162,10 +149,10 @@ public class Robot extends IterativeRobot {
 		
     	/* Shooting */
 		if (gamePad.getRawButton(8)) {
-			shooterLeft1.setSpeed(SHOOTER_RPMS);
-			shooterLeft2.setSpeed(SHOOTER_RPMS);
-			shooterRight1.setSpeed(SHOOTER_RPMS);
-			shooterRight2.setSpeed(SHOOTER_RPMS);
+			shooterLeft1.setSpeed(shooterRPM);
+			shooterLeft2.setSpeed(shooterRPM);
+			shooterRight1.setSpeed(shooterRPM);
+			shooterRight2.setSpeed(shooterRPM);
 		} else {
 			/** TODO:: Fix code to coast or break */
 			shooterLeft1.stop();
@@ -200,22 +187,21 @@ public class Robot extends IterativeRobot {
 	
    
     @Override
-    public void autonomousInit() {    			
-		SmartDashboard.putString("Mode","autonomous init");
-		String amode = chooser.getSelected();
-		SmartDashboard.putString("Auto",amode);
-		
+    public void autonomousInit() {  
+    	dashboard.setMode("autonomous init");
+    	String amode = dashboard.getSelected();
+			
 		leftEnc.reset();
 		rightEnc.reset();
 		
-		if(AUTO_GEAR.equals(amode)) {
+		if(SmartDash.AUTO_GEAR.equals(amode)) {
 			autoClass = new DropGear();
 			//shifter.set(false);
 		}
-		else if(AUTO_SHOOT.equals(amode)) {
+		else if(SmartDash.AUTO_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();
 		}
-		else if(AUTO_DRIVE.equals(amode)) {
+		else if(SmartDash.AUTO_DRIVE.equals(amode)) {
 			DriveAway auto = new DriveAway();
 			auto.setPicker(pickup);
 			auto.setGrabber(grabber);
@@ -234,49 +220,14 @@ public class Robot extends IterativeRobot {
      */
     @Override
     public void autonomousPeriodic() {
-    	
 		/** Smart Dashboard  Encoder Values */
-		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
-		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
-		SmartDashboard.putNumber("Enc 1 Rate", leftEnc.getRate());	
-		SmartDashboard.putNumber("Enc 2 Raw ", rightEnc.getRaw());	
-		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
-		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
-		SmartDashboard.putNumber("Auto LP", autoClass.getLeftPower());	
-		SmartDashboard.putNumber("Auto RP", autoClass.getRightPower());	
+    	dashboard.setLeftEncoder(leftEnc);
+    	dashboard.setRightEncoder(rightEnc);
+    	dashboard.setAutoLP(autoClass.getLeftPower());
+    	dashboard.setAutoRP(autoClass.getRightPower());
 		
 		autoClass.autoPeriodic();
     }
     
-    private void initSmartDashboard() {
-		/** Add selections for autonomous mode **/
-		chooser.addDefault("Auto - Drop Gear", AUTO_GEAR);
-		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
-		chooser.addObject("Auto - Drive Away", AUTO_DRIVE);
-		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
-		SmartDashboard.putData("Auto modes", chooser);
-		SmartDashboard.putString("Drop Gear Distance", "90");
-		SmartDashboard.putString("Shooter Time", "5");
-		SmartDashboard.putString("Shooter RPM", "2700");
-		
-		/** Encoder Values **/
-		SmartDashboard.putNumber("Enc 1 Raw ", leftEnc.getRaw());	
-		SmartDashboard.putNumber("Enc 1 Dist", leftEnc.getDistance());	
-		SmartDashboard.putNumber("Enc 1 Rate", leftEnc.getRate());	
-		
-		SmartDashboard.putNumber("Enc 2 Raw ", rightEnc.getRaw());	
-		SmartDashboard.putNumber("Enc 2 Dist", rightEnc.getDistance());	
-		SmartDashboard.putNumber("Enc 2 Rate", rightEnc.getRate());	
-
-		SmartDashboard.putNumber("Auto LP", 0.0);	
-		SmartDashboard.putNumber("Auto RP", 0.0);
-		
-		SmartDashboard.putNumber("climber", 0.0);
-		SmartDashboard.putString("PID FF", "0.028");
-		SmartDashboard.putString("PID P", "0.0015");
-		SmartDashboard.putString("PID I", "0.0");
-		SmartDashboard.putString("PID D", "0.0");
-
-
-   }
+ 
 }
