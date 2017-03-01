@@ -2,8 +2,8 @@ package org.usfirst.frc.team177.robot;
 
 import org.usfirst.frc.team177.auto.Autonomous;
 import org.usfirst.frc.team177.auto.DoNothing;
-import org.usfirst.frc.team177.auto.DriveAway;
 import org.usfirst.frc.team177.auto.DropGear;
+import org.usfirst.frc.team177.auto.DriveBackwards;
 import org.usfirst.frc.team177.auto.ShootFuel;
 import org.usfirst.frc.team177.lib.RioLogger;
 import org.usfirst.frc.team177.lib.SmartDash;
@@ -195,14 +195,14 @@ public class Robot extends IterativeRobot {
 		rightEnc.reset();
 		
 		if(SmartDash.AUTO_DRIVE.equals(amode)) {
-			autoClass = new DropGear();
+			autoClass = new DriveBackwards();
 			//shifter.set(false);
 		}
 		else if(SmartDash.AUTO_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();
 		}
 		else if(SmartDash.AUTO_GEAR.equals(amode)) {
-			DriveAway auto = new DriveAway();
+			DropGear auto = new DropGear();
 			auto.setPicker(pickup);
 			auto.setGrabber(grabber);
 			autoClass = auto;
