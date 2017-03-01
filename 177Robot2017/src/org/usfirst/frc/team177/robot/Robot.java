@@ -112,7 +112,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 		dashboard.setLeftEncoder(leftEnc);
 		dashboard.setRightEncoder(rightEnc);
-		logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
+		//logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
 		
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -194,14 +194,14 @@ public class Robot extends IterativeRobot {
 		leftEnc.reset();
 		rightEnc.reset();
 		
-		if(SmartDash.AUTO_GEAR.equals(amode)) {
+		if(SmartDash.AUTO_DRIVE.equals(amode)) {
 			autoClass = new DropGear();
 			//shifter.set(false);
 		}
 		else if(SmartDash.AUTO_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();
 		}
-		else if(SmartDash.AUTO_DRIVE.equals(amode)) {
+		else if(SmartDash.AUTO_GEAR.equals(amode)) {
 			DriveAway auto = new DriveAway();
 			auto.setPicker(pickup);
 			auto.setGrabber(grabber);
@@ -209,7 +209,6 @@ public class Robot extends IterativeRobot {
 		} else {
 			autoClass = new DoNothing();
 		}
-	
 		autoClass.setEncoders(leftEnc, rightEnc);
 		autoClass.setDrive(driveTrain);
 		autoClass.autoInit();
@@ -220,7 +219,7 @@ public class Robot extends IterativeRobot {
      */
     @Override
     public void autonomousPeriodic() {
-		/** Smart Dashboard  Encoder Values */
+		/** Smart Dashboard Encoder Values */
     	dashboard.setLeftEncoder(leftEnc);
     	dashboard.setRightEncoder(rightEnc);
     	dashboard.setAutoLP(autoClass.getLeftPower());

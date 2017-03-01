@@ -1,6 +1,9 @@
 package org.usfirst.frc.team177.lib;
 
+import edu.wpi.first.wpilibj.PIDController;
+
 public class SmartPID {
+	//private PIDController pid = new PIDController();
 	private double ff;
 	private double p;
 	private double i;

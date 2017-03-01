@@ -16,7 +16,7 @@ public abstract class Autonomous {
 	protected double prevRightDistance = 0.0;
 	protected double leftPower;
 	protected double rightPower;
-	protected StopWatch watch = new StopWatch(SAMPLE_RATE);
+	protected StopWatch watch = new StopWatch();
 	//protected long autoStartTime;
 
 	//protected RioLoggerThread logger = RioLoggerThread.getInstance();
@@ -33,6 +33,7 @@ public abstract class Autonomous {
 	public Autonomous() {
 		super();
 		//autoStartTime = System.currentTimeMillis();
+		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 
 	public void setEncoders(GrayHill left, GrayHill right) {
@@ -59,7 +60,7 @@ public abstract class Autonomous {
 	protected void adjustDriveStraight() {
 		double ldist = left.getDistance();
 		double rdist = right.getDistance();
- 		logger.log(format(ldist,rdist,leftPower,rightPower));
+ 		//logger.log(format(ldist,rdist,leftPower,rightPower));
 		
 		double leftdiff  = ldist - prevLeftDistance;
 		prevLeftDistance = ldist;

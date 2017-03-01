@@ -33,7 +33,7 @@ public class SmartDash {
 		/** Add selections for autonomous mode **/
 		chooser.addDefault("Auto - Drop Gear", AUTO_GEAR);
 		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
-		chooser.addObject("Auto - Drive Away", AUTO_DRIVE);
+		chooser.addObject("Auto - Drive Backwards", AUTO_DRIVE);
 		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
 		SmartDashboard.putData("Auto modes", chooser);
 		SmartDashboard.putString("Drop Gear Distance", "90");

@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Victor;
  */
 public class DriveAway extends Autonomous {
 	private StopWatch driveTime = new StopWatch();
-	private  Solenoid pickup = null;
+	private Solenoid pickup = null;
 	private Victor grabber = null;
 	
 	private double distance;
@@ -36,6 +36,7 @@ public class DriveAway extends Autonomous {
 		right.reset();
 		prevLeftDistance = 0.0;
 		prevRightDistance = 0.0;
+		autoStep =0;
 		
 		// Set Timers
 		watch.reset();
@@ -50,8 +51,8 @@ public class DriveAway extends Autonomous {
 	    		adjustDriveStraight();
 	       	   	// An artificial check for the bot hitting the wall
 	    		// if count == 10 (robot has been still for 250 millisecond (25 *10)
-	         	if ((Math.abs(left.getDistance() - prevLeftDistance) < 0.5 ))
-	    			notMoved++;
+	         	//if ((Math.abs(left.getDistance() - prevLeftDistance) < 0.5 ))
+	    		//otMoved++;
 	    	}
     		drive.drive(leftPower,rightPower);
          	if ((left.getDistance() > distance) ||
@@ -72,6 +73,7 @@ public class DriveAway extends Autonomous {
         		driveTime.setWatchInSeconds(1.5);
 			}
      	}
+     	/*
     	if (autoStep == 2)	 {
 			drive.drive(0.3,0.3);
 			if (driveTime.hasExpired()) {
@@ -81,7 +83,14 @@ public class DriveAway extends Autonomous {
         		grabber.setSpeed(0);
         		pickup.set(false);
 			}
-     	}    	
+     	} */
+       	if (autoStep == 2)	 {
+    		autoStep = 3;
+    		drive.stop();
+    		driveTime.stop();
+    		grabber.setSpeed(0);
+    		pickup.set(false);
+       	}
 	}
 	
 	public void setPicker(Solenoid pickup) {

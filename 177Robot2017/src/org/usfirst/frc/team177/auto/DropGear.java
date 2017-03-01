@@ -49,7 +49,8 @@ public class DropGear extends Autonomous {
 				adjustDriveStraight();
 			}
 			drive.drive(leftPower, rightPower);
-			if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
+			//if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
+			if (driveTime.hasExpired()) {
 				automode = false;
 				drive.stop();
 				driveTime.stop();
