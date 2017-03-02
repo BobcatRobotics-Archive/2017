@@ -6,6 +6,8 @@ public class StopWatch {
 	private Timer timer = new Timer();
 	private double endTime = 0L;
 	private boolean inSeconds = true;
+	public double secondsIn = 0.0;
+	public double msecsIn = 0.0;
 
 	public StopWatch() {
 		super();
@@ -19,18 +21,26 @@ public class StopWatch {
 	public void setWatchInSeconds(double secs) {
 		endTime = secs;
 		inSeconds = true;
+		secondsIn = secs;
 		reset();
 	}
 	
 	public void setWatchInMillis(double millisecs) {
 		endTime = millisecs + System.currentTimeMillis();
 		inSeconds = false;
+		msecsIn = millisecs;
 		reset();
 	}
 	
 	public void reset() {
-		timer.reset();
-		timer.start();
+		if (inSeconds) {
+			endTime = secondsIn;
+			timer.reset();
+			timer.start();
+
+		} else {
+			endTime = msecsIn + System.currentTimeMillis();
+		}
 	}
 	
 	public void stop() {

@@ -35,7 +35,6 @@ public class DropGear extends Autonomous {
 		right.reset();
 		prevLeftDistance = 0.0;
 		prevRightDistance = 0.0;
-		autoStep = 0;
 
 		// Set Timers
 		watch.reset();
