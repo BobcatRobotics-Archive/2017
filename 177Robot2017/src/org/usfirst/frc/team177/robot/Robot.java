@@ -6,8 +6,10 @@ import org.usfirst.frc.team177.auto.DropGear;
 import org.usfirst.frc.team177.auto.DriveBackwards;
 import org.usfirst.frc.team177.auto.ShootFuel;
 import org.usfirst.frc.team177.lib.RioLogger;
+import org.usfirst.frc.team177.lib.RioLoggerThread;
 import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.SmartPID;
+import org.usfirst.frc.team177.lib.StopWatch;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -34,6 +36,9 @@ import edu.wpi.first.wpilibj.Victor;
 public class Robot extends IterativeRobot {
 	private SmartDash dashboard = SmartDash.getInstance();
 	private RioLogger logger = RioLogger.getInstance();
+	// XXX
+	private RioLoggerThread loggerThread = RioLoggerThread.getInstance();
+
 	
 	/* Autonomous mode Class */
 	Autonomous autoClass = null;
@@ -65,31 +70,62 @@ public class Robot extends IterativeRobot {
 	Victor climber = new Victor(7);
 	Victor grabber = new Victor(8);
 	Victor feeder = new Victor(9);
-	
 
 	/* Variables used in teleop */
 	private double shooterRPM = 0.0;
 	private SmartPID pid;
+	// XXX
+	private int loopCount =0;
+	private int pCount = 0;
+	StopWatch watch = new StopWatch();
+	StopWatch telewatch = new StopWatch();
+	
+	// XXX
 
 
 	public Robot() {
+		logger.log("robot constructor called");
 	}
 
 	@Override
 	public void robotInit() {
+		logger.log("robotInit() called");
+		loggerThread.start();
+		loggerThread.setLoggingParameters(3000, 30);
+		loggerThread.log("robotInit() called");
+		
+
 		dashboard.init();
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
 	}
 
+   @Override
+	public void disabledInit(){
+	   	logger.log("disabledInit() called");
+		loggerThread.log("disabledInit() called");
+    	loggerThread.log("teleop loops " + loopCount + " sample loop " + pCount);
+    	
+    	//logger.stopLogging();
+	}
+   
     @Override
 	public void disabledPeriodic(){
-    	//logger.stopLogging();
+    	//logger.log("disabledPeriodic() called");
+    	
+     	//logger.stopLogging();
 	}
     
 	@Override
 	public void teleopInit() {
+		// XXXX
+		loggerThread.log("teleop init called");
+		watch.setWatchInMillis(250L);
+		telewatch.setWatchInSeconds(30);
+		
+    	logger.log("teleopInit() called");
+		
 		dashboard.setMode("teleop init");
 		pickup.set(true);
 				
@@ -102,7 +138,6 @@ public class Robot extends IterativeRobot {
 		
 		shooterRPM = dashboard.getShooterRPM();
 		logger.log("RPM = " + shooterRPM);
-
 	}
 	
 	/**
@@ -110,6 +145,17 @@ public class Robot extends IterativeRobot {
      */
 	@Override
     public void teleopPeriodic() {
+		// XXXX
+		if (!telewatch.hasExpired()) 
+			loopCount++;
+		if (!telewatch.hasExpired()) {
+			if (watch.hasExpired()) {
+				watch.reset();
+				loggerThread.log(shooterLeft1.getSpeed() + " " + shooterRight1.getSpeed());
+				pCount++;
+			}
+		}
+		// XXX
 		dashboard.setLeftEncoder(leftEnc);
 		dashboard.setRightEncoder(rightEnc);
 		//logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
@@ -154,12 +200,11 @@ public class Robot extends IterativeRobot {
 			shooterRight1.setSpeed(shooterRPM);
 			shooterRight2.setSpeed(shooterRPM);
 		} else {
-			/** TODO:: Fix code to coast or break */
 			shooterLeft1.stop();
 			shooterLeft2.stop();
-			shooterRight1.setSpeed(0.0);
-			shooterRight2.setSpeed(0.0);
-	}
+			shooterRight1.stop();
+			shooterRight2.stop();
+		}
 		
 		// Emergency Button for pick up
 		if (gamePad.getRawButton(4)) {
@@ -169,7 +214,12 @@ public class Robot extends IterativeRobot {
 		if (gamePad.getRawButton(3)) {
 			pickup.set(true);
 		}
+	}
 
+
+	@Override
+    public void testInit() {
+		logger.log("testInit() called");
 	}
 
 	/**
@@ -188,6 +238,8 @@ public class Robot extends IterativeRobot {
    
     @Override
     public void autonomousInit() {  
+    	logger.log("autonomousInit() called()");
+    	
     	dashboard.setMode("autonomous init");
     	String amode = dashboard.getSelected();
 			

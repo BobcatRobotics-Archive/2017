@@ -4,7 +4,7 @@ import org.usfirst.frc.team177.lib.StopWatch;
 
 /**
  * This class is used in Autonomous Mode to drive straight to the gear drop
- * station and drop the gear
+ * station 
  * 
  * @author frc177
  *
@@ -49,8 +49,7 @@ public class DriveBackwards extends Autonomous {
 				adjustDriveStraight();
 			}
 			drive.drive(leftPower, rightPower);
-			//if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
-			if (driveTime.hasExpired()) {
+			if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
 				automode = false;
 				drive.stop();
 				driveTime.stop();

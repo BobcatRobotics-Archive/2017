@@ -18,16 +18,14 @@ public class StopWatch {
 	
 	public void setWatchInSeconds(double secs) {
 		endTime = secs;
-		timer.reset();
-		timer.start();
 		inSeconds = true;
+		reset();
 	}
 	
 	public void setWatchInMillis(double millisecs) {
 		endTime = millisecs + System.currentTimeMillis();
 		inSeconds = false;
-		timer.reset();
-		timer.start();
+		reset();
 	}
 	
 	public void reset() {
