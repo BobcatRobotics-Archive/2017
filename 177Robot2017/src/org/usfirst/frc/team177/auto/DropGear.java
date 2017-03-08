@@ -49,10 +49,12 @@ public class DropGear extends Autonomous {
 				adjustDriveStraight();
 				// An artificial check for the bot hitting the wall
 				// if notMoved == 10 (robot has been still for 250 millisecond (25 * 10)
+				/**
 				if ((Math.abs(left.getDistance() - prevLeftDistance) < 0.25))
 					notMoved++;
 				else
 					notMoved = 0;
+					*/
 			}
 			drive.drive(leftPower, rightPower);
 			if ((left.getDistance() > distance) || (right.getDistance() > distance) ||

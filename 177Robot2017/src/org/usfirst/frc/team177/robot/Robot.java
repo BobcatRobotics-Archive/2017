@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Victor;
  */
 public class Robot extends IterativeRobot {
 	private SmartDash dashboard = SmartDash.getInstance();
-	private RioLoggerThread logger = RioLoggerThread.getInstance();
+	private RioLoggerThread logger = null;
 
 	/* Autonomous mode Class */
 	Autonomous autoClass = null;
@@ -31,6 +31,7 @@ public class Robot extends IterativeRobot {
 	Joystick leftStick = new Joystick(1);
 	Joystick rightStick = new Joystick(0);
 	Joystick gamePad = new Joystick(2);
+	Joystick switchBoard = new Joystick(3);
 	
 	/** Solenoids **/ 
 	public Solenoid shifter = new Solenoid(0); /* For shifting */
@@ -57,14 +58,19 @@ public class Robot extends IterativeRobot {
 	private SmartPID pid;
 	/* End teleop vars */
 
+	/* Emergency Button for Climber */
+	boolean isEmergency = false;
+
 	public Robot() {
+		logger = RioLoggerThread.getInstance();
+		//logger.setLoggingParameters(3600, 15); /* 1 hour, every 30 seconds */
+		logger.setLoggingParameters(300, 15); /* 5 minutes, every 30 seconds */
+		logger.start();
 		logger.log("robot constructor called");
 	}
 
 	@Override
 	public void robotInit() {
-		logger.start();
-		logger.setLoggingParameters(3000, 30);
 		logger.log("robotInit() called");
 	
 		dashboard.init();
@@ -76,19 +82,17 @@ public class Robot extends IterativeRobot {
    @Override
 	public void disabledInit(){
 	   	logger.log("disabledInit() called");
-    	//logger.stopLogging();
-	}
+		}
    
     @Override
 	public void disabledPeriodic(){
-    	//logger.log("disabledPeriodic() called");
-     	//logger.stopLogging();
-	}
+ 	}
     
 	@Override
 	public void teleopInit() {
     	logger.log("teleopInit() called");
-		
+       	logger.writeLog();
+       	
 		dashboard.setMode("teleop init");
 		pickup.set(true);
 				
@@ -103,16 +107,15 @@ public class Robot extends IterativeRobot {
 		logger.log("RPM = " + shooterRPM);
 	}
 	
-	/**
+
+	/*
      * This function is called periodically during operator control
      */
 	@Override
     public void teleopPeriodic() {
-
 		dashboard.setLeftEncoder(leftEnc);
 		dashboard.setRightEncoder(rightEnc);
-		//logger.log("speed " + shooterLeft1.getSpeed() + " " + shooterLeft2.getSpeed());
-		
+
     	//Driving
     	double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -126,13 +129,23 @@ public class Robot extends IterativeRobot {
 		
 		// Climbing
 		//double climbAmt = rightStick.getRawAxis(Joystick.AxisType.kX.value); 
-		double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
-		dashboard.setClimber(climbAmt);
-		if (climbAmt > 0.0) 
+		double climbAmt = gamePad.getRawAxis(3) * -1.0; /** 3 - Z Rotate Axis **/
+		if (climbAmt > 1.0) 
+			climbAmt = 1.0;
+		else if (climbAmt < 0.0)
 			climbAmt = 0.0;
-		else if (climbAmt < -1.0)
-			climbAmt = -1.0;
 		climber.set(climbAmt);
+		
+		// Emergency Code if the Climber ratchet shifts
+		if (switchBoard.getRawButton(4))  {
+			climber.set(-0.5);
+			isEmergency = true;
+		} 
+		if (isEmergency && !switchBoard.getRawButton(4)) {
+			climber.set(0.0);
+			isEmergency = false;
+		}
+		// End Emergency Code
 		
 		// Feeder Balls 
 		double feederspeed = gamePad.getRawAxis(Joystick.AxisType.kY.value);
@@ -140,11 +153,10 @@ public class Robot extends IterativeRobot {
 		
 		grabber.setSpeed(0.0);
 		if (gamePad.getRawButton(7)) 
-			grabber.setSpeed(-0.5);
+			grabber.setSpeed(0.5);
 		else
 		if (gamePad.getRawButton(5)) 
-			grabber.setSpeed(0.5);
-	
+			grabber.setSpeed(-0.5);
 		
     	/* Shooting */
 		if (gamePad.getRawButton(8)) {
@@ -185,16 +197,16 @@ public class Robot extends IterativeRobot {
      	double left = leftStick.getRawAxis(Joystick.AxisType.kX.value);
  		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
  		driveTrain.drive(left, right);
-
     }
 	
    
     @Override
     public void autonomousInit() {  
+    	logger.writeLog();
     	dashboard.setMode("autonomous init");
     	String amode = dashboard.getSelected();
        	logger.log("autonomousInit() called. mode is " + amode);
-        		
+       	
 		leftEnc.reset();
 		rightEnc.reset();
 		
@@ -230,7 +242,5 @@ public class Robot extends IterativeRobot {
     	dashboard.setAutoRP(autoClass.getRightPower());
 		
 		autoClass.autoPeriodic();
-    }
-    
- 
-}
+    }  
+  }
