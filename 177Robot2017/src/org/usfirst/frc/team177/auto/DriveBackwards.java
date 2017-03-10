@@ -16,9 +16,8 @@ public class DriveBackwards extends Autonomous {
 
 	public DriveBackwards() {
 		super();
-
-		leftPower = 0.60;
-		rightPower = 0.46;
+		driveTrain.setLeftPower(INITIAL_LEFT_POWER);
+		driveTrain.setRightPower(INITIAL_RIGHT_POWER);
 		automode = true;
 	}
 
@@ -30,8 +29,6 @@ public class DriveBackwards extends Autonomous {
 		distance = dashboard.getGearDistance();
 		logger.log("Drop gear distance is " + distance);
 		
-		left.reset();
-		right.reset();
 		prevLeftDistance = 0.0;
 		prevRightDistance = 0.0;
 
@@ -48,10 +45,10 @@ public class DriveBackwards extends Autonomous {
 				watch.reset();
 				adjustDriveStraight();
 			}
-			drive.drive(leftPower, rightPower);
-			if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
+			driveTrain.drive();
+			if (shouldStop(distance, driveTime)) {
 				automode = false;
-				drive.stop();
+				driveTrain.stop();
 				driveTime.stop();
 			}
 		}

@@ -39,12 +39,7 @@ public class Robot extends IterativeRobot {
 	/* Solenoids */
 	Solenoid shifter = new Solenoid(0); /* For shifting */
 	Solenoid caster = new Solenoid(1); /* For engaging casters */
-	Solenoid pickup = new Solenoid(
-			2); /* Kick out the pick up mechanism */
-
-	/* GrayHill Encoders */
-	GrayHill rightEnc = new GrayHill(0, 1);
-	GrayHill leftEnc = new GrayHill(2, 3, false);
+	Solenoid pickup = new Solenoid(2); /* Kick out the pick up mechanism */
 
 	/* Talons */
 	Talon shooterLeft1 = new Talon(1, true);
@@ -58,7 +53,9 @@ public class Robot extends IterativeRobot {
 	Victor feeder = new Victor(9);
 
 	/* Gyro */
-	AHRS ahrs;
+	// TODO:: Check Gyro isConnected 
+	// TODO:: Check Gyro isConnected XXXXXXXX
+	AHRS gyro;
 
 	/* Variables used in teleop */
 	private double shooterRPM = 0.0;
@@ -70,8 +67,7 @@ public class Robot extends IterativeRobot {
 
 	public Robot() {
 		logger = RioLoggerThread.getInstance();
-		logger.setLoggingParameters(3600,
-				15); /* 1 hour, log every 30 seconds */
+		logger.setLoggingParameters(3600,15); /* 1 hour, log every 30 seconds */
 		logger.start();
 		logger.log("robot constructor called");
 	}
@@ -79,16 +75,17 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		logger.log("robotInit() called");
-
 		dashboard.init();
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
+		driveTrain.setLeftEncoder(new GrayHill(2, 3, false));
+		driveTrain.setRightEncoder(new GrayHill(0, 1));
 
 		/* Navx mxp Gyro */
 		try {
 			/* Communicate w/navX-MXP via the MXP SPI Bus. */
-			ahrs = new AHRS(SPI.Port.kMXP);
+			gyro = new AHRS(SPI.Port.kMXP);
 			logger.log("robotInit() called. navx-mxp initialized");
 
 		} catch (RuntimeException ex) {
@@ -96,6 +93,7 @@ public class Robot extends IterativeRobot {
 			DriverStation.reportError(err, false);
 			logger.log(err);
 		}
+
 	}
 
 	@Override
@@ -131,8 +129,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		dashboard.setLeftEncoder(leftEnc);
-		dashboard.setRightEncoder(rightEnc);
+		dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
+		dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
 
 		// Driving
 		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -225,9 +223,8 @@ public class Robot extends IterativeRobot {
 		String amode = dashboard.getSelected();
 		logger.log("autonomousInit() called. mode is " + amode);
 
-		leftEnc.reset();
-		rightEnc.reset();
-
+		driveTrain.reset();
+	
 		if (SmartDash.AUTO_DRIVE.equals(amode)) {
 			autoClass = new DriveBackwards();
 			// shifter.set(false);
@@ -241,8 +238,8 @@ public class Robot extends IterativeRobot {
 		} else {
 			autoClass = new DoNothing();
 		}
-		autoClass.setEncoders(leftEnc, rightEnc);
 		autoClass.setDrive(driveTrain);
+		autoClass.setGyro(gyro);
 		autoClass.autoInit();
 	}
 
@@ -252,10 +249,10 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		/** Smart Dashboard Encoder Values */
-		dashboard.setLeftEncoder(leftEnc);
-		dashboard.setRightEncoder(rightEnc);
-		dashboard.setAutoLP(autoClass.getLeftPower());
-		dashboard.setAutoRP(autoClass.getRightPower());
+		dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
+		dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
+		dashboard.setAutoLP(driveTrain.getLeftPower());
+		dashboard.setAutoRP(driveTrain.getRightPower());
 
 		autoClass.autoPeriodic();
 	}

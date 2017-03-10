@@ -41,12 +41,12 @@ public class SmartDash {
 		SmartDashboard.putString("Shooter RPM", "2700");
 
 		/** Encoder Values **/
-		SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
-		SmartDashboard.putNumber("Enc 1 Dist", 0.0);
-		SmartDashboard.putNumber("Enc 1 Rate", 0.0);
-		SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
-		SmartDashboard.putNumber("Enc 2 Dist", 0.0);
-		SmartDashboard.putNumber("Enc 2 Rate", 0.0);
+		//SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
+		SmartDashboard.putNumber("Enc Left Dist", 0.0);
+		//SmartDashboard.putNumber("Enc 1 Rate", 0.0);
+		//SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
+		SmartDashboard.putNumber("Enc Right Dist", 0.0);
+		//SmartDashboard.putNumber("Enc 2 Rate", 0.0);
 
 		SmartDashboard.putNumber("Auto LP", 0.0);
 		SmartDashboard.putNumber("Auto RP", 0.0);
@@ -65,7 +65,16 @@ public class SmartDash {
 	public void setMode(String mode) {
 		SmartDashboard.putString("Mode", mode);
 	}
-
+	
+	public void setLeftEncoderDistance(double distance) {
+		SmartDashboard.putNumber("Enc Left Dist", distance);	
+	}
+	
+	public void setRightEncoderDistance(double distance) {
+		SmartDashboard.putNumber("Enc Right Dist", distance);	
+	}
+	
+	/**
 	public void setLeftEncoder(GrayHill encoder) {
 		SmartDashboard.putNumber("Enc 1 Dist", encoder.getDistance());	
 		SmartDashboard.putNumber("Enc 1 Raw ", encoder.getRaw());	
@@ -77,6 +86,7 @@ public class SmartDash {
 		SmartDashboard.putNumber("Enc 2 Raw ", encoder.getRaw());	
 		SmartDashboard.putNumber("Enc 2 Rate", encoder.getRate());	
 	}
+	*/
 	
 	public void setClimber(double climbAmt) {
 		SmartDashboard.putNumber("climber", climbAmt);
