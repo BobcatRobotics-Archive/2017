@@ -9,6 +9,7 @@ import org.usfirst.frc.team177.robot.GrayHill;
 public abstract class Autonomous {
 
 	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20times / seconds */
+	/** Variables for Drive Staight */
 	private static final double INCREASE_CORRECTION = 1.05;
 	private static final double DECREASE_CORRECTION = 0.95;
 	private static double deadBandRange = 0.0;
@@ -17,9 +18,7 @@ public abstract class Autonomous {
 	protected double leftPower;
 	protected double rightPower;
 	protected StopWatch watch = new StopWatch();
-	//protected long autoStartTime;
 
-	//protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected SmartDash dashboard = SmartDash.getInstance();
 	protected GrayHill left;

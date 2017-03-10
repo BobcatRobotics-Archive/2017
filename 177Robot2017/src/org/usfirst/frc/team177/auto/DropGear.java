@@ -73,11 +73,6 @@ public class DropGear extends Autonomous {
 				driveTime.setWatchInSeconds(1.5);
 			}
 		}
-		/*
-		 * if (autoStep == 2) { drive.drive(0.3,0.3); if
-		 * (driveTime.hasExpired()) { autoStep = 3; drive.stop();
-		 * driveTime.stop(); grabber.setSpeed(0); pickup.set(false); } }
-		 */
 		if (autoStep == 2) {
 			autoStep = 3;
 			drive.stop();

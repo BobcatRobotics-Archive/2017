@@ -44,7 +44,6 @@ public class SmartDash {
 		SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
 		SmartDashboard.putNumber("Enc 1 Dist", 0.0);
 		SmartDashboard.putNumber("Enc 1 Rate", 0.0);
-
 		SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
 		SmartDashboard.putNumber("Enc 2 Dist", 0.0);
 		SmartDashboard.putNumber("Enc 2 Rate", 0.0);
@@ -57,6 +56,10 @@ public class SmartDash {
 		SmartDashboard.putString("PID P", "0.0015");
 		SmartDashboard.putString("PID I", "0.0");
 		SmartDashboard.putString("PID D", "0.0");
+		
+		SmartDashboard.putNumber("Gyro Rate", 0.0);
+		SmartDashboard.putNumber("Gyro Angle", 0.0);
+	
 	}
 
 	public void setMode(String mode) {
@@ -87,6 +90,14 @@ public class SmartDash {
 		SmartDashboard.putNumber("Auto RP", power);	
 	}
 	
+	public void setGyroRate(double power) {
+		SmartDashboard.putNumber("Gyro Rate", power);	
+	}
+
+	public void setGyroAngle(double power) {
+		SmartDashboard.putNumber("Gyro Angle", power);	
+	}
+	
 	public SmartPID getPID() {
 		SmartPID pid = new SmartPID();
 		pid.setFF(new Double(SmartDashboard.getString("PID FF")));
@@ -114,4 +125,11 @@ public class SmartDash {
 		return new Double(SmartDashboard.getString("Shooter Time"));
 	}
 
+	public double getGyroRate() {
+		return new Double(SmartDashboard.getNumber("Gyro Rate"));
+	}
+	
+	public double getGyroAngle() {
+		return new Double(SmartDashboard.getNumber("Gyro Angle"));
+	}
 }
