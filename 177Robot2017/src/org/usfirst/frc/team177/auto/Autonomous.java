@@ -1,12 +1,14 @@
 package org.usfirst.frc.team177.auto;
 
-import org.usfirst.frc.team177.lib.RioLogger;
+import org.usfirst.frc.team177.lib.RioLoggerThread;
+import org.usfirst.frc.team177.lib.SmartDash;
+import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.DriveChain;
 import org.usfirst.frc.team177.robot.GrayHill;
 
 public abstract class Autonomous {
 
-	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20 / seconds */
+	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20times / seconds */
 	private static final double INCREASE_CORRECTION = 1.05;
 	private static final double DECREASE_CORRECTION = 0.95;
 	private static double deadBandRange = 0.0;
@@ -14,9 +16,12 @@ public abstract class Autonomous {
 	protected double prevRightDistance = 0.0;
 	protected double leftPower;
 	protected double rightPower;
-	protected long autoStartTime;
+	protected StopWatch watch = new StopWatch();
+	//protected long autoStartTime;
 
-	protected RioLogger logger = new RioLogger();
+	//protected RioLoggerThread logger = RioLoggerThread.getInstance();
+	protected RioLoggerThread logger = RioLoggerThread.getInstance();
+	protected SmartDash dashboard = SmartDash.getInstance();
 	protected GrayHill left;
 	protected GrayHill right;
 	DriveChain drive;
@@ -27,7 +32,7 @@ public abstract class Autonomous {
 
 	public Autonomous() {
 		super();
-		autoStartTime = System.currentTimeMillis();
+		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 
 	public void setEncoders(GrayHill left, GrayHill right) {

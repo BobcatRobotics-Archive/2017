@@ -1,6 +1,6 @@
 package org.usfirst.frc.team177.auto;
 
-public class DriveAway extends Autonomous {
+public class DoNothing extends Autonomous {
 
 	@Override
 	public void autoInit() {
