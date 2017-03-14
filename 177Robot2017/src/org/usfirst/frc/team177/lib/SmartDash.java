@@ -1,13 +1,13 @@
 package org.usfirst.frc.team177.lib;
 
-import org.usfirst.frc.team177.robot.GrayHill;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SmartDash {
 
-	public static final String AUTO_GEAR = "agear";
+	public static final String AUTO_GEAR_STRAIGHT = "agear";
+	public static final String AUTO_GEAR_LEFT = "agearleft";
+	public static final String AUTO_GEAR_RIGHT = "agearright";
 	public static final String AUTO_SHOOT = "ashoot";
 	public static final String AUTO_DRIVE = "adrive";
 	public static final String AUTO_NOTHING = "anothing";
@@ -31,12 +31,16 @@ public class SmartDash {
 
 	public void init() {
 		/** Add selections for autonomous mode **/
-		chooser.addDefault("Auto - Drop Gear", AUTO_GEAR);
-		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
+		chooser.addDefault("Auto - Drop Gear Straight", AUTO_GEAR_STRAIGHT);
+		chooser.addObject("Auto - Drop Gear Left Side", AUTO_GEAR_LEFT);
+		chooser.addObject("Auto - Drop Gear Right Side", AUTO_GEAR_RIGHT);
 		chooser.addObject("Auto - Drive Backwards", AUTO_DRIVE);
+		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
 		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
 		SmartDashboard.putData("Auto modes", chooser);
-		SmartDashboard.putString("Drop Gear Distance", "90");
+		SmartDashboard.putNumber("Auto - Distance #1", 62.1);
+		SmartDashboard.putNumber("Auto - Turn Angle ", 60.0);
+		SmartDashboard.putNumber("Auto - Distance #2", 80.8);
 		SmartDashboard.putString("Shooter Time", "5");
 		SmartDashboard.putString("Shooter RPM", "2700");
 
@@ -108,6 +112,30 @@ public class SmartDash {
 		SmartDashboard.putNumber("Gyro Angle", power);	
 	}
 	
+	public void setAutoDistance1(double power) {
+		SmartDashboard.putNumber("Auto - Distance #1", power);	
+	}
+
+	public void setTurnAngle(double power) {
+		SmartDashboard.putNumber("Auto - Turn Angle ", power);	
+	}
+
+	public void setAutoDistance2(double power) {
+		SmartDashboard.putNumber("Auto - Distance #2", power);	
+	}
+
+	public double getAutoDistance1() {
+		return new Double(SmartDashboard.getDouble("Auto - Distance #1"));	
+	}
+
+	public double getTurnAngle() {
+		return new Double(SmartDashboard.getDouble("Auto - Turn Angle "));	
+	}
+
+	public double getAutoDistance2() {
+		return new Double(SmartDashboard.getDouble("Auto - Distance #2"));	
+	}
+
 	public SmartPID getPID() {
 		SmartPID pid = new SmartPID();
 		pid.setFF(new Double(SmartDashboard.getString("PID FF")));
@@ -126,10 +154,11 @@ public class SmartDash {
 		SmartDashboard.putString("Auto",amode);
 		return amode;
 	}
-
+	/*
 	public double getGearDistance() {		
 		return new Double(SmartDashboard.getString("Drop Gear Distance"));
 	}
+	*/
 
 	public double getShooterTime() {
 		return new Double(SmartDashboard.getString("Shooter Time"));

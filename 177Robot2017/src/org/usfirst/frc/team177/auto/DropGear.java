@@ -12,18 +12,18 @@ import edu.wpi.first.wpilibj.Victor;
  * @author bobcat177
  *
  */
-public class DropGear extends Autonomous {
-	private StopWatch driveTime = new StopWatch();
-	private Solenoid pickup = null;
-	private Victor grabber = null;
+public abstract class DropGear extends Autonomous {
+	protected StopWatch driveTime = new StopWatch();
+	protected Solenoid pickup = null;
+	protected Victor grabber = null;
 
-	private double distance;
-	private int autoStep = 0;
+	protected double distance1 = 0.0;
+	protected double angleToTurn = 0.0;
+	protected double distance2 = 0.0;
+	protected int autoStep = 0;
 
 	public DropGear() {
 		super();
-		driveTrain.setLeftPower(INITIAL_LEFT_POWER * -1.0);
-		driveTrain.setRightPower(INITIAL_RIGHT_POWER * -1.0);
 	}
 	
 	public void setPicker(Solenoid pickup) {
@@ -33,49 +33,26 @@ public class DropGear extends Autonomous {
 	public void setGrabber(Victor grabber) {
 		this.grabber = grabber;
 	}
+
 	@Override
 	public void autoInit() {
-		distance = dashboard.getGearDistance();
-		logger.log("Drop gear distance is " + distance);
+		//distance = dashboard.getGearDistance();
+		distance1 = dashboard.getAutoDistance1();
+		distance2 = dashboard.getAutoDistance2();
+		angleToTurn = dashboard.getTurnAngle();
+		logger.log("Drop gear parameters " + distance1 + ", " + distance2 + ", " + angleToTurn);
+
+		driveTrain.reset();
+		//gyro.reset();
+
+		autoStep = 0;
 		prevLeftDistance = 0.0;
 		prevRightDistance = 0.0;
 
 		// Set Timers
-		watch.reset();
 		driveTime.setWatchInSeconds(3.0);
+		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 
-	@Override
-	public void autoPeriodic() {
-		if (autoStep == 0) {
-			if (watch.hasExpired()) {
-				watch.reset();
-				adjustDriveStraight();
-			}
-			driveTrain.drive();
-			if (shouldStop(distance,driveTime)) {
-				autoStep = 1;
-				driveTrain.stop();
-				driveTime.setWatchInSeconds(1.0);
-			}
-		}
-		if (autoStep == 1) {
-			grabber.setSpeed(-0.5);
-			pickup.set(true);
-			driveTrain.drive(0.3, 0.3);
-			if (driveTime.hasExpired()) {
-				autoStep = 2;
-				driveTime.setWatchInSeconds(1.5);
-			}
-		}
-		if (autoStep == 2) {
-			autoStep = 3;
-			driveTrain.stop();
-			driveTime.stop();
-			grabber.setSpeed(0);
-			pickup.set(false);
-		}
-	}
-
-
+	public abstract void autoPeriodic();
 }

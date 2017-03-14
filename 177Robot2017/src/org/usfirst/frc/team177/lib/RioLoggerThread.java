@@ -12,6 +12,7 @@ import java.util.List;
 public class RioLoggerThread extends Thread {
 	private String path =  File.separator + "home" + File.separator + "lvuser" + File.separator + "logs";
 	private String filename = path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.thread.txt'").format(new Date());
+	private static RioLoggerThread singleton;
 
 	private List<String> logs = new ArrayList<String>();
 	private long totalLogTime = 3600 * 1000L; // Default is 1 hour (milliseconds)
@@ -19,8 +20,6 @@ public class RioLoggerThread extends Thread {
 	private long endTime = 0L;
 	private boolean isLogging = true;
 
-	private static RioLoggerThread singleton;
-	
 	//private static RioLogger lg = RioLogger.getInstance();
 	//private int nbrEntries = 0;
 	
@@ -29,7 +28,8 @@ public class RioLoggerThread extends Thread {
 		super();
 		createLogDirectory();
 		endTime = System.currentTimeMillis() + totalLogTime;
-		logs.add("RioLoggerThread started");
+		//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
+		logs.add("RioLoggerThread created");
 	}
 
 	/* Create a static method to get instance. */
@@ -45,6 +45,8 @@ public class RioLoggerThread extends Thread {
 		totalLogTime = totLogTime * 1000L;
 		logFrequency = totFreq *1000L;
 		endTime = System.currentTimeMillis() + totalLogTime;
+		log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
+		//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
 	}
 
 	public void log(String line) {
@@ -61,20 +63,9 @@ public class RioLoggerThread extends Thread {
 		interrupt();
 	}
 	
-	/**
-	public void startLogging() {
-		endTime = System.currentTimeMillis() + totalLogTime;
-		if (!isLogging)  {
-			isLogging = true;
-			this.run();
-		}
-		lg.log("startLogging() called. new endTime is " + endTime);
-	}
-	*/
-	
-
 	@Override
 	public void run() {
+		log("RioLoggerThread started");
 		do {
 			try {
 					Thread.sleep(logFrequency);
@@ -87,7 +78,8 @@ public class RioLoggerThread extends Thread {
 				logs.clear();
 				writeLog(tempLog);
 			} 
-	
+			//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
+			//lg.log("isLogging " + isLogging);
 		} while (isLogging && (System.currentTimeMillis() < endTime));
 		isLogging = false;
 		logs.add("RioLoggerThread ending");
@@ -123,5 +115,4 @@ public class RioLoggerThread extends Thread {
 			e.printStackTrace();
 		}
 	}
-
 }

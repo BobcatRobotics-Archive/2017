@@ -4,13 +4,14 @@ import org.usfirst.frc.team177.lib.RioLoggerThread;
 import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.DriveChain;
-
-import com.kauailabs.navx.frc.AHRS;
+import org.usfirst.frc.team177.robot.NavxGyro;
 
 public abstract class Autonomous {
 	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20times / seconds */
-	protected static final double INITIAL_LEFT_POWER = 0.60;
-	protected static final double INITIAL_RIGHT_POWER = 0.46;
+	protected static final double INITIAL_LEFT_POWER_FORWARD = 0.60;
+	protected static final double INITIAL_RIGHT_POWER_FORWARD = 0.46;
+	protected static final double INITIAL_LEFT_POWER_BACKWARD = -0.60;
+	protected static final double INITIAL_RIGHT_POWER_BACKWARD = -0.46;
 	
 	/** Variables for Drive Staight */
 	private static final double INCREASE_CORRECTION = 1.05;
@@ -23,7 +24,7 @@ public abstract class Autonomous {
 	protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected SmartDash dashboard = SmartDash.getInstance();
 	protected DriveChain driveTrain;
-	protected AHRS gyro;
+	protected NavxGyro gyro;
 
 	public abstract void autoInit();
 
@@ -31,14 +32,13 @@ public abstract class Autonomous {
 
 	public Autonomous() {
 		super();
-		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 
 	public void setDrive(DriveChain drive) {
 		this.driveTrain = drive;
 	}
 
-	public void setGyro(AHRS gyro) {
+	public void setGyro(NavxGyro gyro) {
 		this.gyro = gyro;
 	}
 	
@@ -79,8 +79,8 @@ public abstract class Autonomous {
 	
 	protected boolean shouldStop(double totalDistance,StopWatch timer) {
 		boolean stop = false;
-		if ((driveTrain.getLeftDistance() > totalDistance) ||
-			(driveTrain.getRightDistance() > totalDistance))
+		if ((Math.abs(driveTrain.getLeftDistance()) > totalDistance) ||
+			(Math.abs(driveTrain.getRightDistance()) > totalDistance))
 			stop = true;
 		if (timer.hasExpired())
 			stop = true;

@@ -14,7 +14,7 @@ public class ShootFuel extends Autonomous {
 	private StopWatch driveTimer;
 	private long shooterRPM = 0L;
 	private double shootTime = 0.0;
-	private int isShooting = 0;
+	private int shootingStep = 0;
 
 	public void setShooters(Talon l1,Talon l2,Talon r1,Talon r2) {
 		shooterLeft1 = l1;
@@ -39,31 +39,31 @@ public class ShootFuel extends Autonomous {
 	@Override
 	public void autoPeriodic() {
     	
-    	if (isShooting  == 0 ) {
+    	if (shootingStep  == 0 ) {
 			shooterLeft1.setSpeed(shooterRPM);
 			shooterLeft2.setSpeed(shooterRPM);
 			shooterRight1.setSpeed(shooterRPM);
 			shooterRight2.setSpeed(shooterRPM);
-			isShooting = 1;
+			shootingStep++;
     	} 
-		if (isShooting == 1 && shootTimer.hasExpired()) {
+		if (shootingStep == 1 && shootTimer.hasExpired()) {
   			shooterLeft1.setSpeed(0.0);
 			shooterLeft2.setSpeed(0.0);
 			shooterRight1.setSpeed(0.0);
 			shooterRight2.setSpeed(0.0);
-			isShooting = 2;
 			driveTrain.setLeftPower(0.3);
 			driveTrain.setRightPower(0.3);
 			watch.reset();
+			shootingStep++;
 		}
-    	if (isShooting == 2) {
+    	if (shootingStep == 2) {
     		if (watch.hasExpired()) {
 				watch.reset();
 				adjustDriveStraight();
 			}
 			driveTrain.drive();
 			if (shouldStop(DISTANCE_AFTER_SHOOTING,driveTimer)) {
-				isShooting = 3;
+				shootingStep++;
 				driveTrain.stop();
 			}
     	}
