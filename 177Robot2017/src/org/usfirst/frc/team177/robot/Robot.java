@@ -164,6 +164,7 @@ public class Robot extends IterativeRobot {
 		caster.set(leftStick.getRawButton(3));
 
 		// Ball Pickup - This controls Climber and ball pickup
+		//if (ballPickup.isOn()) {
 		if (ballPickup.isOn()) {
 			climber.set(1.0);
 			ballShift.set(true);
@@ -176,11 +177,12 @@ public class Robot extends IterativeRobot {
 			isPickupOrShooting = false;
 		}
 		if (gamePad.getRawButton(5))
-			gearGrabber.setSpeed(0.5);
+			ballGrabber.setSpeed(0.5);
 		else if (gamePad.getRawButton(7))
-			gearGrabber.setSpeed(-0.5);
+			ballGrabber.setSpeed(-0.5);
 		
 		// Gear Pickup - This controls Gear Grabber and Gear Pickup 
+		/**
 		if (gearPickup.isOn()) {
 			gearShift.set(true);
 			gearGrabber.set(0.5);
@@ -194,20 +196,27 @@ public class Robot extends IterativeRobot {
 			gearGrabber.setSpeed(0.5);
 		else if (gamePad.getRawButton(8))
 			gearGrabber.setSpeed(-0.5);
+			*/
 
 	
 		// Climbing
 		// double climbAmt = rightStick.getRawAxis(Joystick.AxisType.kX.value);
-		if (!isPickupOrShooting) {
-			double climbAmt = gamePad.getRawAxis(3) * -1.0; /** 3 - Z Rotate Axis **/
-			if (climbAmt > 1.0)
-				climbAmt = 1.0;
-			else if (climbAmt < 0.0)
+		//if (!isPickupOrShooting) {
+			double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
+			/*
+			if (climbAmt < 0)
 				climbAmt = 0.0;
 			climber.set(climbAmt);
+			*/
+		//}
+		if (gearPickup.isOn()) {
+			climber.set(-1.0);
 		}
-
+		else 
+			climber.set(0.0);
+		
 		// Emergency Code if the Climber ratchet shifts
+		/**
 		if (switchBoard.getRawButton(4)) {
 			climber.set(-0.5);
 			isEmergency = true;
@@ -216,24 +225,9 @@ public class Robot extends IterativeRobot {
 			climber.set(0.0);
 			isEmergency = false;
 		}
+		*/
 		// End Emergency Code
 
-		// Feeder Balls
-		/*
-		double feederspeed = gamePad.getRawAxis(Joystick.AxisType.kY.value);
-		feeder.setSpeed(feederspeed);
-		*/
-
-		// Gear Grabber
-		/*
-		grabber.setSpeed(0.0);
-		if (gamePad.getRawButton(7))
-			grabber.setSpeed(0.5);
-		else if (gamePad.getRawButton(5))
-			grabber.setSpeed(-0.5);
-			*/
-
-		// Shooting 
 		// Shooting controls Climber, Helix and Shooting
 		if (shooter.isOn()) {
 			shooterLeft1.setSpeed(shooterRPM);
@@ -252,17 +246,6 @@ public class Robot extends IterativeRobot {
 			climber.set(0.0);
 			helix.set(0.0);
 		}
-
-		// Emergency Button for pick up
-		/**
-		if (gamePad.getRawButton(4)) {
-			pickup.set(false);
-		}
-		// Emergency Button for pick up
-		if (gamePad.getRawButton(3)) {
-			pickup.set(true);
-		}
-		*/
 	}
 
 	@Override

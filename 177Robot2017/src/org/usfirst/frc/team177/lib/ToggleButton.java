@@ -17,6 +17,7 @@ public class ToggleButton {
 
 	private ToggleButton() {
 		super();
+		pressedTime.setWatchInMillis(PRESS_TIME_MILLIS);
 	}
 	
 	public ToggleButton(Joystick joyStick, int buttonNbr) {
