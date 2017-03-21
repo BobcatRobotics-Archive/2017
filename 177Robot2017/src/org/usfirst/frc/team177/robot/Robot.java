@@ -69,6 +69,9 @@ public class Robot extends IterativeRobot {
 	ToggleButton ballPickup;
 	ToggleButton shooter;
 	boolean isPickupOrShooting = false;
+	boolean isPickupToggle = false;
+	boolean isShootingToggle = false;
+	boolean isGearToggle = false;
 	
 	/* Emergency Button for Climber */
 	boolean isEmergency = false;
@@ -155,7 +158,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		logger.writeLog();
-		logWatch.setWatchInMillis(500);
+		logWatch.setWatchInMillis(250);
 		//dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
 		//dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
 
@@ -170,56 +173,61 @@ public class Robot extends IterativeRobot {
 		// Caster
 		caster.set(leftStick.getRawButton(3));
 
+		// Climbing
+		if (!isPickupOrShooting) {
+			double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
+			logger.log("in teleop. climbAmt =  " + climbAmt) ;
+			if (climbAmt > 0.0)
+				climbAmt = 0.0;
+			logger.log("in teleop. climbAmt post cap =  " + climbAmt) ;
+			dashboard.setClimber(climbAmt);
+			climber.set(climbAmt);
+		}
+
 		// Ball Pickup - This controls Climber and ball pickup
 		if (ballPickup.isOn()) {
 			climber.set(-1.0);
 			ballShift.set(true);
 			ballGrabber.set(1.0);
 			isPickupOrShooting = true;
+			isPickupToggle = true;
 		} else {
-			climber.set(0.0);
-			ballShift.set(false);
-			ballGrabber.set(0.0);
-			isPickupOrShooting = false;
+			if (isPickupToggle) {
+				climber.set(0.0);
+				ballShift.set(false);
+				ballGrabber.set(0.0);
+				isPickupOrShooting = false;
+				isPickupToggle = false;
+			}
 		}
-		if (gamePad.getRawButton(5))
-			ballGrabber.setSpeed(1.0);
-		else if (gamePad.getRawButton(7))
-			ballGrabber.setSpeed(-1.0);
-		else 
-			ballGrabber.setSpeed(0.0);
+		if (!isPickupToggle) {
+			if (gamePad.getRawButton(5))
+				ballGrabber.setSpeed(1.0);
+			else if (gamePad.getRawButton(7))
+				ballGrabber.setSpeed(-1.0);
+			else 
+				ballGrabber.setSpeed(0.0);
+		}
 			
 		// Gear Pickup - This controls Gear Grabber and Gear Pickup 
 		if (gearPickup.isOn()) {
 			gearShift.set(true);
 			gearGrabber.set(1.0);
-			isPickupOrShooting = true;
+			isGearToggle = true;
 		} else {
-			gearShift.set(false);
-			gearGrabber.set(0.0);
-			isPickupOrShooting = false;
-		}	
-		if (gamePad.getRawButton(6))
-			gearGrabber.setSpeed(1.0);
-		else if (gamePad.getRawButton(8))
-			gearGrabber.setSpeed(-0.5);
-		else
-			gearGrabber.setSpeed(0.0);
-
-	
-		// Climbing
-		if (logWatch.hasExpired()) {
-			logWatch.reset();
-			logger.log("in teleop. isPickupOrShooting = " + isPickupOrShooting) ;
-			if (!isPickupOrShooting) {
-				double climbAmt = gamePad.getRawAxis(Joystick.AxisType.kY.value); /** 3 - Z Rotate Axis **/
-				logger.log("in teleop. climbAmt =  " + climbAmt) ;
-				if (climbAmt > 0.0)
-					climbAmt = 0.0;
-				logger.log("in teleop. climbAmt post cap =  " + climbAmt) ;
-				dashboard.setClimber(climbAmt);
-				//climber.set(climbAmt);
+			if (isGearToggle) {
+				gearShift.set(false);
+				gearGrabber.set(0.0);
+				isGearToggle = false;
 			}
+		}	
+		if (!isGearToggle) {
+			if (gamePad.getRawButton(6))
+				gearGrabber.setSpeed(1.0);
+			else if (gamePad.getRawButton(8))
+				gearGrabber.setSpeed(-0.5);
+			else
+				gearGrabber.setSpeed(0.0);
 		}
 		
 		// Shooting controls Climber, Helix and Shooting
@@ -228,20 +236,29 @@ public class Robot extends IterativeRobot {
 			shooterLeftUpper.setSpeed(shooterRPMS[1]);
 			shooterRightLower.setSpeed(shooterRPMS[2]);
 			shooterRightUpper.setSpeed(shooterRPMS[3]);
-			logger.log(shooterLeftLower.getSpeed() + ", " + shooterLeftUpper.getSpeed() + ", " + shooterRightLower.getSpeed() + ", " + shooterRightUpper.getSpeed());
+			if (logWatch.hasExpired()) {
+				logWatch.reset();
+				logger.log(shooterLeftLower.getSpeed() + ", " + shooterLeftUpper.getSpeed() + ", " + shooterRightLower.getSpeed() + ", " + shooterRightUpper.getSpeed());
+			}
 			climber.set(-1.0);
 			helix.set(0.5);
-
+			isPickupOrShooting = true;
+			isShootingToggle = true;
 		} else {
-			shooterLeftLower.stop();
-			shooterLeftUpper.stop();
-			shooterRightLower.stop();
-			shooterRightUpper.stop();
-			
-			climber.set(0.0);
-			helix.set(0.0);
-		}
+			if (isShootingToggle) {
+				shooterLeftLower.stop();
+				shooterLeftUpper.stop();
+				shooterRightLower.stop();
+				shooterRightUpper.stop();
 		
+				climber.set(0.0);
+				helix.set(0.0);
+				isPickupOrShooting = false;
+				isShootingToggle = false;
+			}
+		}
+
+
 		// Emergency Code if the Climber ratchet shifts
 		/**
 		if (switchBoard.getRawButton(4)) {
