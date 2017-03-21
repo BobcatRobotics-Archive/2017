@@ -12,7 +12,7 @@ public class ShootFuel extends Autonomous {
 	private Talon shooterRight2;
 	private StopWatch shootTimer;
 	private StopWatch driveTimer;
-	private long shooterRPM = 0L;
+	private double [] shooterRPM = { 0.0, 0.0, 0.0, 0.0 };
 	private double shootTime = 0.0;
 	private int shootingStep = 0;
 
@@ -28,10 +28,13 @@ public class ShootFuel extends Autonomous {
 		shootTime = dashboard.getShooterTime();
 		logger.log("Shooter Time  is " + shootTime);
 		
-		shooterRPM = dashboard.getShooterRPM();
-		logger.log("Shooter RPM " + shooterRPM );
-		
+		shooterRPM = dashboard.getShooterRPMS();
+		logger.log("RPM Left Lower " + shooterRPM[0]);
+		logger.log("RPM Left Upper " + shooterRPM[1]);
+		logger.log("RPM Right Lower " + shooterRPM[2]);
+		logger.log("RPM Right Upper " + shooterRPM[3]);		
 		// Set Timers
+		
 		driveTimer.setWatchInSeconds(5.0);
 		shootTimer.setWatchInSeconds(shootTime);
 	}
@@ -40,10 +43,10 @@ public class ShootFuel extends Autonomous {
 	public void autoPeriodic() {
     	
     	if (shootingStep  == 0 ) {
-			shooterLeft1.setSpeed(shooterRPM);
-			shooterLeft2.setSpeed(shooterRPM);
-			shooterRight1.setSpeed(shooterRPM);
-			shooterRight2.setSpeed(shooterRPM);
+			shooterLeft1.setSpeed(shooterRPM[0]);
+			shooterLeft2.setSpeed(shooterRPM[1]);
+			shooterRight1.setSpeed(shooterRPM[2]);
+			shooterRight2.setSpeed(shooterRPM[3]);
 			shootingStep++;
     	} 
 		if (shootingStep == 1 && shootTimer.hasExpired()) {

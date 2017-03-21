@@ -38,12 +38,17 @@ public class SmartDash {
 		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
 		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
 		SmartDashboard.putData("Auto modes", chooser);
-		SmartDashboard.putNumber("Auto - Distance #1", 62.1);
+		SmartDashboard.putNumber("Auto - Distance #1", 90.0);
 		SmartDashboard.putNumber("Auto - Turn Angle ", 60.0);
 		SmartDashboard.putNumber("Auto - Distance #2", 80.8);
 		SmartDashboard.putString("Shooter Time", "5");
-		SmartDashboard.putString("Shooter RPM", "2700");
-
+		
+		SmartDashboard.putNumber("Left Lower RPM", 2700);
+		SmartDashboard.putNumber("Left Upper RPM", 2700);
+		SmartDashboard.putNumber("Right Lower RPM", 2700);
+		SmartDashboard.putNumber("Right Upper RPM", 2700);
+		
+		
 		/** Encoder Values **/
 		//SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
 		SmartDashboard.putNumber("Enc Left Dist", 0.0);
@@ -61,8 +66,8 @@ public class SmartDash {
 		SmartDashboard.putString("PID I", "0.0");
 		SmartDashboard.putString("PID D", "0.0");
 		
-		SmartDashboard.putNumber("Gyro Rate", 0.0);
-		SmartDashboard.putNumber("Gyro Angle", 0.0);
+		//SmartDashboard.putNumber("Gyro Rate", 0.0);
+		//SmartDashboard.putNumber("Gyro Angle", 0.0);
 	
 	}
 
@@ -104,6 +109,7 @@ public class SmartDash {
 		SmartDashboard.putNumber("Auto RP", power);	
 	}
 	
+	/*
 	public void setGyroRate(double power) {
 		SmartDashboard.putNumber("Gyro Rate", power);	
 	}
@@ -111,6 +117,7 @@ public class SmartDash {
 	public void setGyroAngle(double power) {
 		SmartDashboard.putNumber("Gyro Angle", power);	
 	}
+	*/
 	
 	public void setAutoDistance1(double power) {
 		SmartDashboard.putNumber("Auto - Distance #1", power);	
@@ -145,10 +152,27 @@ public class SmartDash {
 		return pid;
 	}
 
+	/**
 	public long getShooterRPM() {
 		return new Long(SmartDashboard.getString("Shooter RPM"));
+	} */
+	
+	public double[] getShooterRPMS() {
+		double [] rpms = new double[4];
+		rpms[0] = new Double(SmartDashboard.getDouble("Left Lower RPM"));
+		rpms[1] = new Double(SmartDashboard.getDouble("Left Upper RPM"));
+		rpms[2] = new Double(SmartDashboard.getDouble("Right Lower RPM"));
+		rpms[3] = new Double(SmartDashboard.getDouble("Right Upper RPM"));
+		return rpms;
 	}
 
+	public void setShooterRPMS(double [] rpms) {
+		SmartDashboard.putNumber("Left Lower RPM", rpms[0]);
+		SmartDashboard.putNumber("Left Upper RPM", rpms[1]);
+		SmartDashboard.putNumber("Right Lower RPM", rpms[2]);
+		SmartDashboard.putNumber("Right Upper RPM", rpms[3]);
+	}
+	
 	public String getSelected() {
 		String amode = chooser.getSelected();
 		SmartDashboard.putString("Auto",amode);
@@ -163,7 +187,7 @@ public class SmartDash {
 	public double getShooterTime() {
 		return new Double(SmartDashboard.getString("Shooter Time"));
 	}
-
+	/*
 	public double getGyroRate() {
 		return new Double(SmartDashboard.getNumber("Gyro Rate"));
 	}
@@ -171,4 +195,5 @@ public class SmartDash {
 	public double getGyroAngle() {
 		return new Double(SmartDashboard.getNumber("Gyro Angle"));
 	}
+	*/
 }

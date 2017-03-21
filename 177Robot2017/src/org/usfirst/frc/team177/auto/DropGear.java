@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj.Victor;
  */
 public abstract class DropGear extends Autonomous {
 	protected StopWatch driveTime = new StopWatch();
-	protected Solenoid pickup = null;
-	protected Victor grabber = null;
+	protected Solenoid gearPickup = null;
+	protected Victor gearGrabber = null;
 
 	protected double distance1 = 0.0;
 	protected double angleToTurn = 0.0;
@@ -27,11 +27,11 @@ public abstract class DropGear extends Autonomous {
 	}
 	
 	public void setPicker(Solenoid pickup) {
-		this.pickup = pickup;
+		this.gearPickup = pickup;
 	}
 
 	public void setGrabber(Victor grabber) {
-		this.grabber = grabber;
+		this.gearGrabber = grabber;
 	}
 
 	@Override
@@ -40,6 +40,7 @@ public abstract class DropGear extends Autonomous {
 		distance1 = dashboard.getAutoDistance1();
 		distance2 = dashboard.getAutoDistance2();
 		angleToTurn = dashboard.getTurnAngle();
+		logger.writeLog();
 		logger.log("Drop gear parameters " + distance1 + ", " + distance2 + ", " + angleToTurn);
 
 		driveTrain.reset();

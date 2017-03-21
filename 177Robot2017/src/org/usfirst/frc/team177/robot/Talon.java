@@ -44,9 +44,11 @@ public class Talon extends CANTalon {
 		set(speed);
 	}
 	
+	/**
 	public double getSpeed() {
-		return getSpeed();
+		return super.getSpeed();
 	}
+	*/
 	
 	public void stop() {
 		set(0.0);

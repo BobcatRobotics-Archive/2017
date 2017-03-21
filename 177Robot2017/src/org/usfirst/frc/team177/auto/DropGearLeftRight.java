@@ -3,6 +3,7 @@ package org.usfirst.frc.team177.auto;
 import org.usfirst.frc.team177.lib.StopWatch;
 
 public class DropGearLeftRight extends DropGear  {
+	private static final double LEFT_RIGHT_DRIVE_FORWARDS = -0.4;
 	StopWatch displayData = new StopWatch();
 	private boolean turnLeft = true;
 	private double startingYaw = 0.0;
@@ -29,7 +30,7 @@ public class DropGearLeftRight extends DropGear  {
 		driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
 
 		// Set Timers - Base Timers (driveTime, watch) set in DropGear
-		displayData.setWatchInMillis(500);
+		displayData.setWatchInMillis(250);
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class DropGearLeftRight extends DropGear  {
 			logger.log("step 1. turning to angle " + newAngle);
 			gyro.displayData();
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(1500);
+			driveTime.setWatchInMillis(2000);
 			autoStep++;
 		}
 		if (autoStep == 2) {
@@ -64,12 +65,13 @@ public class DropGearLeftRight extends DropGear  {
 				displayData.reset();
 			}
 			if (turnLeft)
-				driveTrain.drive(0.0,rate);
+				driveTrain.drive(rate * -1.0, rate);
 			else
-				driveTrain.drive(rate,0.0);
+				driveTrain.drive(rate,rate * - 1.0);
 			if (driveTime.hasExpired()) {
 				logger.log("step 2. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
 				logger.log("step 2. final yaw is  " + gyro.getYaw());
+				gyro.displayData();
 				gyro.stopTurn();
 				driveTrain.reset();
 				driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
@@ -92,19 +94,19 @@ public class DropGearLeftRight extends DropGear  {
 			}
 		}
 		if (autoStep == 4) {
-			grabber.setSpeed(-0.5);
-			pickup.set(true);
-			driveTrain.drive(0.4,0.4);
+			gearGrabber.setSpeed(-0.5);
+			gearPickup.set(true);
+			driveTrain.drive(LEFT_RIGHT_DRIVE_FORWARDS,LEFT_RIGHT_DRIVE_FORWARDS);
 			if (driveTime.hasExpired()) {
-				driveTime.setWatchInSeconds(1.5);
+				//driveTime.setWatchInSeconds(1.5);
 				autoStep++;
 			}
 		}
 		if (autoStep == 5) {
 			driveTrain.stop();
 			driveTime.stop();
-			grabber.setSpeed(0);
-			pickup.set(false);
+			gearGrabber.setSpeed(0);
+			gearPickup.set(false);
 			autoStep++;
 		}
 	}

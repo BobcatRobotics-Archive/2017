@@ -1,10 +1,14 @@
 package org.usfirst.frc.team177.auto;
 
 public class DropGearStraight extends DropGear {
+	private static final double LEFT_RIGHT_DRIVE_FORWARDS = -0.4;
 
 	@Override
 	public void autoInit() {
 		super.autoInit();
+		
+		driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
+		driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
 
 		// Set Timers - Base Timers (driveTime, watch) set in DropGear
 	}
@@ -24,9 +28,9 @@ public class DropGearStraight extends DropGear {
 			}
 		}
 		if (autoStep == 1) {
-			grabber.setSpeed(-0.5);
-			pickup.set(true);
-			driveTrain.drive(0.3, 0.3);
+			gearGrabber.setSpeed(-0.5);
+			gearPickup.set(true);
+			driveTrain.drive(LEFT_RIGHT_DRIVE_FORWARDS, LEFT_RIGHT_DRIVE_FORWARDS);
 			if (driveTime.hasExpired()) {
 				driveTime.setWatchInSeconds(1.5);
 				autoStep++;
@@ -35,8 +39,8 @@ public class DropGearStraight extends DropGear {
 		if (autoStep == 2) {
 			driveTrain.stop();
 			driveTime.stop();
-			grabber.setSpeed(0);
-			pickup.set(false);
+			gearGrabber.setSpeed(0);
+			gearPickup.set(false);
 			autoStep++;
 		}
 	}

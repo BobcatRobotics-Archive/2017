@@ -8,11 +8,11 @@ package org.usfirst.frc.team177.auto;
  *
  */
 public class DriveBackwards extends DropGear {
-	private boolean automode;
+	//private boolean automode;
+	private static final double LINE_DISTANCE = 60.0;
 
 	public DriveBackwards() {
 		super();
-		automode = true;
 	}
 
 	@Override
@@ -23,21 +23,18 @@ public class DriveBackwards extends DropGear {
 		driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 
 		// Set Timers - Base Timers (driveTime, watch) set in DropGear
-
 	}
 
 	@Override
 	public void autoPeriodic() {
-		if (automode) {
+		if (autoStep == 0) {
 			if (watch.hasExpired()) {
 				watch.reset();
 				adjustDriveStraight();
 			}
 			driveTrain.drive();
-			if (shouldStop(distance1, driveTime)) {
-				automode = false;
-				driveTrain.stop();
-				driveTime.stop();
+			if (shouldStop(LINE_DISTANCE, driveTime)) {
+				autoStep++;
 			}
 		}
 	}

@@ -8,10 +8,10 @@ import org.usfirst.frc.team177.robot.NavxGyro;
 
 public abstract class Autonomous {
 	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20times / seconds */
-	protected static final double INITIAL_LEFT_POWER_FORWARD = 0.60;
-	protected static final double INITIAL_RIGHT_POWER_FORWARD = 0.46;
-	protected static final double INITIAL_LEFT_POWER_BACKWARD = -0.60;
-	protected static final double INITIAL_RIGHT_POWER_BACKWARD = -0.46;
+	protected static final double INITIAL_LEFT_POWER_FORWARD = -0.60;
+	protected static final double INITIAL_RIGHT_POWER_FORWARD = -0.46;
+	protected static final double INITIAL_LEFT_POWER_BACKWARD = 0.60;
+	protected static final double INITIAL_RIGHT_POWER_BACKWARD = 0.46;
 	
 	/** Variables for Drive Staight */
 	private static final double INCREASE_CORRECTION = 1.05;
@@ -88,7 +88,7 @@ public abstract class Autonomous {
 	}
 
 	protected boolean shouldStopGyro() {
-		return gyro.isMoving();
+		return !gyro.isMoving() && !gyro.isRotating();
 	}
 
 }
