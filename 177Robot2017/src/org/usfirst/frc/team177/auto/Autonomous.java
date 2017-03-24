@@ -52,7 +52,7 @@ public abstract class Autonomous {
 		double rdist = driveTrain.getRightDistance();
 		double leftPower = driveTrain.getLeftPower();
 		double rightPower = driveTrain.getRightPower();
- 		logger.log(format(ldist,rdist,leftPower,rightPower));
+ 		//logger.log(format(ldist,rdist,leftPower,rightPower));
 		
 		double leftdiff  = ldist - prevLeftDistance;
 		prevLeftDistance = ldist;

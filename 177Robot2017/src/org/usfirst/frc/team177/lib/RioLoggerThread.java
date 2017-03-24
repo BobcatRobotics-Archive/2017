@@ -11,8 +11,9 @@ import java.util.List;
 
 public class RioLoggerThread extends Thread {
 	private String path =  File.separator + "home" + File.separator + "lvuser" + File.separator + "logs";
-	private String filename = path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.thread.txt'").format(new Date());
+	private String filename = path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss'.thread.txt'").format(new Date());
 	private static RioLoggerThread singleton;
+	private RioLogger lg = RioLogger.getInstance();
 
 	private List<String> logs = new ArrayList<String>();
 	private long totalLogTime = 3600 * 1000L; // Default is 1 hour (milliseconds)
@@ -20,16 +21,11 @@ public class RioLoggerThread extends Thread {
 	private long endTime = 0L;
 	private boolean isLogging = true;
 
-	//private static RioLogger lg = RioLogger.getInstance();
-	//private int nbrEntries = 0;
-	
 	/* Create private constructor */
 	private RioLoggerThread() {
 		super();
 		createLogDirectory();
-		endTime = System.currentTimeMillis() + totalLogTime;
-		//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
-		logs.add("RioLoggerThread created");
+		log("RioLoggerThread() constructor");
 	}
 
 	/* Create a static method to get instance. */
@@ -45,8 +41,9 @@ public class RioLoggerThread extends Thread {
 		totalLogTime = totLogTime * 1000L;
 		logFrequency = totFreq *1000L;
 		endTime = System.currentTimeMillis() + totalLogTime;
-		log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
-		//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
+		//log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
+		lg.log("RioLoggerThread setParms() current time, end time " +System.currentTimeMillis() + ", " + endTime );
+		start();
 	}
 
 	public void log(String line) {
@@ -71,20 +68,22 @@ public class RioLoggerThread extends Thread {
 					Thread.sleep(logFrequency);
 			} catch (InterruptedException e) {
 				/* The thread can be interrupted by a request to write the logs */
-				System.out.println("RioLoggerThread interrupted" + e);
+				lg.log("RioLoggerThread interrupted.");
+				e.printStackTrace();
 			}
 			if (logs.size() > 0) {
 				List<String> tempLog = new ArrayList<String>(logs);
 				logs.clear();
 				writeLog(tempLog);
 			} 
-			//lg.log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
-			//lg.log("isLogging " + isLogging);
+			//lg.log("run() current time, end time " +System.currentTimeMillis() + ", " + endTime );
+			//lg.log("run() isLogging " + isLogging);
 		} while (isLogging && (System.currentTimeMillis() < endTime));
-		isLogging = false;
-		logs.add("RioLoggerThread ending");
+		log("RioLoggerThread ending");
+		lg.log("RioLoggerThread ending ending current time, end time " +System.currentTimeMillis() + ", " + endTime );
 		writeLog(logs);
 		logs.clear();
+		isLogging = false;
 	}
 
 	private void createLogDirectory() {
@@ -93,7 +92,7 @@ public class RioLoggerThread extends Thread {
 			try {
 				newDir.mkdir();
 			} catch (SecurityException e) {
-				System.out.println("RioLogger Security exception " + e);
+				lg.log("RioLogger Security exception " + e);
 				e.printStackTrace();
 			}
 		}
@@ -111,7 +110,7 @@ public class RioLoggerThread extends Thread {
 			// Close the file
 			outputStream.close();
 		} catch (IOException e) {
-			System.out.print("Error writing log " + e);
+			lg.log("Error writing log " + e);
 			e.printStackTrace();
 		}
 	}

@@ -24,8 +24,8 @@ public class DropGearLeftRight extends DropGear  {
 		if (!turnLeft)
 			angleToTurn = angleToTurn * -1;
 		startingYaw = gyro.getYaw();
-		logger.log("auto init called. (left, angleToTurn)" + turnLeft + ", " + angleToTurn);
-		logger.log("auto init called. startingYaw " + startingYaw);
+		logger.log("autoInit() called. (left, angleToTurn) " + turnLeft + ", " + angleToTurn);
+		logger.log("autoInit() called. startingYaw " + startingYaw);
 	
 		driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
 		driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
@@ -57,7 +57,7 @@ public class DropGearLeftRight extends DropGear  {
 			}
 			logger.log("step 1. start yaw, current yaw " + startingYaw + ", " + gyro.getYaw() );
 			logger.log("step 1. turning to angle " + newAngle);
-			gyro.displayData();
+			dashboard.displayData(gyro);
 			gyro.turnToAngle(newAngle);
 			driveTime.setWatchInMillis(15000);
 			autoStep++;
@@ -66,17 +66,17 @@ public class DropGearLeftRight extends DropGear  {
 			double rate = gyro.getRotateToAngleRate();
 
 			if (displayData.hasExpired()) {
-				logger.log("step 2. rate is " + rate);
-				gyro.displayData();
+				logger.log("step 2. rate = " + rate + " currentYaw = " + gyro.getYaw());
+				dashboard.displayData(gyro);
 				displayData.reset();
 			}
 			
-			driveTrain.drive(rate * -1.0,rate);
+			driveTrain.drive(rate * -1.0, rate);
 			
 			if (driveTime.hasExpired() /*gyro.hasStopped()*/) {
 				logger.log("step 2. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
 				logger.log("step 2. final yaw is  " + gyro.getYaw());
-				gyro.displayData();
+				dashboard.displayData(gyro);
 				gyro.stopTurn();
 				driveTrain.reset();
 				driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);

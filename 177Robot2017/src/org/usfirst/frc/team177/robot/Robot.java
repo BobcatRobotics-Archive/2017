@@ -20,16 +20,15 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
 
-
 /**
  * 
  */
 public class Robot extends IterativeRobot {
 	private SmartDash dashboard = SmartDash.getInstance();
-	private RioLoggerThread logger = RioLoggerThread.getInstance();
 	private RioLogger logFile = RioLogger.getInstance();
 	private StopWatch logWatch = new StopWatch();
 	private DriverStation ds = DriverStation.getInstance();
+	private RioLoggerThread logger = null;
 
 	/* Autonomous mode Class */
 	Autonomous autoClass = null;
@@ -46,7 +45,7 @@ public class Robot extends IterativeRobot {
 	/* Solenoids */
 	Solenoid shifter = new Solenoid(0); /* For shifting */
 	Solenoid caster = new Solenoid(3); /* For engaging casters */
-	Solenoid ballShift = new Solenoid(2); 
+	Solenoid ballShift = new Solenoid(2);
 	Solenoid gearShift = new Solenoid(1);
 
 	/* Talons */
@@ -63,8 +62,8 @@ public class Robot extends IterativeRobot {
 
 	/* Gyro */
 	NavxGyro gyro;
-	//boolean isGyroCreated = true;
-	double [] shooterRPMS = {2700.0,2700.0,2700.0,2700.0};
+	// boolean isGyroCreated = true;
+	double[] shooterRPMS = { 2700.0, 2700.0, 2700.0, 2700.0 };
 
 	/* Toggle Buttons */
 	ToggleButton gearPickup;
@@ -76,11 +75,13 @@ public class Robot extends IterativeRobot {
 	boolean isShooterPickupToggle = false;
 	boolean isLoggerEnabled = false;
 
-	
 	/* Emergency Button for Climber */
 	boolean isEmergency = false;
-	
-	/* Variables to loop until gyro is calibrated we've tried some number of times */
+
+	/*
+	 * Variables to loop until gyro is calibrated we've tried some number of
+	 * times
+	 */
 	int maxCalibrationPasses = 20;
 	int iCalibrationPasses;
 	double pauseCalibrationSeconds = 0.1;
@@ -92,8 +93,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		dashboard.init();
-		logWatch.setWatchInSeconds(5);
-		logFile.log("robotInit() driver station isDSAttached()  " + ds.isDSAttached());
+		logWatch.setWatchInSeconds(30);
 		
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
@@ -116,13 +116,15 @@ public class Robot extends IterativeRobot {
 				if (!gyro.isCalibrating()) break;
 				logFile.log("robotInit() gyro is calibrating, pass " + iCalibrationPasses);
 			}
+			logFile.log("robotInit() gyro is calibrating " + gyro.isCalibrating());
+			logFile.log("robotInit() currentYaw " + gyro.getYaw());
 			// gyro.zeroYaw();
-			logFile.log("robotInit() gyro yaw is zeroed");
+			//logFile.log("robotInit() gyro yaw is zeroed");
+			dashboard.displayData(gyro);
 		} catch (RuntimeException ex) {
 			String err = "Error instantiating navX-MXP:  " + ex.getMessage();
 			DriverStation.reportError(err, false);
 			logFile.log(err);
-			//isGyroCreated = false;
 		}
 	}
 
@@ -130,28 +132,30 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		logFile.log("disabledInit() called");
 		startThreadLogger();
-		//ballShift.set(false);  /* In position */
-		//gearShift.set(true);  /* Up position */
 	}
 
 	@Override
 	public void disabledPeriodic() {
+		/**
 		if (logWatch.hasExpired()) {
 			logWatch.reset();
+			logFile.log("disabledPeriodic() called");
 			logFile.log("disabledPeriodic() gyro is calibrating " + gyro.isCalibrating());
 			logFile.log("disabledPeriodic() driver station is attached " + ds.isDSAttached());
 			logFile.log("disabledPeriodic() driver station is enabled " + ds.isEnabled());
 		}
+		*/
 	}
 
 	@Override
 	public void teleopInit() {
-			dashboard.setMode("teleop init");
-		
-		ballShift.set(true);   /* Out (pickup position) */
-		gearShift.set(false);  /* Up position */
+		logFile.log("teleopInit() called");
+		dashboard.setMode("teleop init");
+
+		ballShift.set(true); /* Out (pickup position) */
+		gearShift.set(false); /* Up position */
 		driveTrain.reset();
-		
+
 		// Read PID Parameters
 		SmartPID pid = dashboard.getPID();
 		shooterLeftLower.setPIDParameters(pid);
@@ -169,8 +173,8 @@ public class Robot extends IterativeRobot {
 		startThreadLogger();
 		dashboard.setMode("teleop periodic");
 		logWatch.setWatchInMillis(500);
-		//dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
-		//dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
+		// dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
+		// dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
 
 		// Driving
 		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
@@ -204,11 +208,11 @@ public class Robot extends IterativeRobot {
 				ballGrabber.setSpeed(1.0);
 			else if (gamePad.getRawButton(7))
 				ballGrabber.setSpeed(-1.0);
-			else 
+			else
 				ballGrabber.setSpeed(0.0);
 		}
-			
-		// Gear Pickup - This controls Gear Grabber and Gear Pickup 
+
+		// Gear Pickup - This controls Gear Grabber and Gear Pickup
 		if (gearPickup.isOn()) {
 			gearShift.set(true);
 			gearGrabber.set(1.0);
@@ -219,7 +223,7 @@ public class Robot extends IterativeRobot {
 			gearGrabber.set(0.0);
 			isPickupOrShooting = false;
 			isGearPickupToggle = false;
-		}	
+		}
 		if (!isGearPickupToggle) {
 			if (gamePad.getRawButton(6))
 				gearGrabber.setSpeed(1.0);
@@ -231,15 +235,16 @@ public class Robot extends IterativeRobot {
 
 		// Climbing
 		if (!isPickupOrShooting) {
-			double climbAmt = gamePad.getRawAxis(Joystick.AxisType.kY.value); /** 3 - Z Rotate Axis **/
-			//logger.log("in teleop. climbAmt =  " + climbAmt) ;
+			double climbAmt = gamePad.getRawAxis(
+					Joystick.AxisType.kY.value); /** 3 - Z Rotate Axis **/
+			// logger.log("in teleop. climbAmt = " + climbAmt) ;
 			if (climbAmt > 0.0)
 				climbAmt = 0.0;
-			//logger.log("in teleop. climbAmt post cap =  " + climbAmt) ;
+			// logger.log("in teleop. climbAmt post cap = " + climbAmt) ;
 			dashboard.setClimber(climbAmt);
 			climber.set(climbAmt);
 		}
-		
+
 		// Shooting controls Climber, Helix and Shooting
 		if (shooter.isOn()) {
 			shooterLeftLower.setSpeed(shooterRPMS[0]);
@@ -260,14 +265,14 @@ public class Robot extends IterativeRobot {
 				shooterLeftUpper.stop();
 				shooterRightLower.stop();
 				shooterRightUpper.stop();
-		
+
 				climber.set(0.0);
 				helix.set(0.0);
 				isPickupOrShooting = false;
 				isShooterPickupToggle = false;
 			}
 		}
-		
+
 		// Emergency Code if the Climber ratchet shifts
 		/**
 		if (switchBoard.getRawButton(4)) {
@@ -278,7 +283,7 @@ public class Robot extends IterativeRobot {
 			climber.set(0.0);
 			isEmergency = false;
 		}
-		*/
+	 	*/
 		// End Emergency Code
 
 	}
@@ -292,7 +297,7 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		/**
 		 * This is crazy reverse code just to test that test mode is working
-		 * Joysticks work on x axis (left to right) 
+		 * Joysticks work on x axis (left to right)
 		 **/
 		double left = leftStick.getRawAxis(Joystick.AxisType.kX.value);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kX.value);
@@ -301,17 +306,16 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+		logFile.log("autonomousInit() called");
 		startThreadLogger();
-	
+
 		dashboard.setMode("autonomous init");
 		String amode = dashboard.getSelected();
-		//amode = SmartDash.AUTO_NOTHING;
-				
 		logger.log("autonomousInit() called. mode is " + amode);
 
 		driveTrain.reset();
 		driveTrain.stop();
-	
+
 		if (SmartDash.AUTO_DRIVE.equals(amode)) {
 			autoClass = new DriveBackwards();
 			// shifter.set(false);
@@ -322,8 +326,7 @@ public class Robot extends IterativeRobot {
 			auto.setPicker(gearShift);
 			auto.setGrabber(gearGrabber);
 			autoClass = auto;
-		}  else if (SmartDash.AUTO_GEAR_LEFT.equals(amode) ||
-				    SmartDash.AUTO_GEAR_RIGHT.equals(amode)) {
+		} else if (SmartDash.AUTO_GEAR_LEFT.equals(amode) || SmartDash.AUTO_GEAR_RIGHT.equals(amode)) {
 			boolean turnLeft = SmartDash.AUTO_GEAR_LEFT.equals(amode);
 			DropGearLeftRight auto = new DropGearLeftRight(turnLeft);
 			auto.setPicker(gearShift);
@@ -350,25 +353,24 @@ public class Robot extends IterativeRobot {
 
 		autoClass.autoPeriodic();
 	}
-	
+
 	/**
-	 *  Since when the Driver Station attaches is sets the time on the Roborio,
-	 *  starts the logger afterwards. 
-.	 *  
+	 * Since when the Driver Station attaches is sets the time on the Roborio,
+	 * start the logger afterwards. .
 	 */
 	private void startThreadLogger() {
 		if (ds.isDSAttached() && !isLoggerEnabled) {
+			logger = RioLoggerThread.getInstance();
 			logger.setLoggingParameters(3600,15); /* 1 hour, log every 15 seconds */
-			logger.start();
-			logger.log("logger started");
+			//logger.log("logger started");
 			logger.writeLog();
 			isLoggerEnabled = true;
 		}
 	}
-	
+
 	/**
-	 * Call this method to reset controls. This addresses the issue when an operator
-	 * disables Teleop, or Autonomous and the Driver Station "remembers"  Joystick
-	 * settings
+	 * Call this method to reset controls. This addresses the issue when an
+	 * operator disables Teleop, or Autonomous and the Driver Station
+	 * "remembers" Joystick settings and PWM Seetign
 	 */
 }
