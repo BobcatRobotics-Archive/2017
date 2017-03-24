@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
 
+
 /**
  * 
  */
@@ -78,6 +79,11 @@ public class Robot extends IterativeRobot {
 	
 	/* Emergency Button for Climber */
 	boolean isEmergency = false;
+	
+	/* Variables to loop until gyro is calibrated we've tried some number of times */
+	int maxCalibrationPasses = 20;
+	int iCalibrationPasses;
+	double pauseCalibrationSeconds = 0.1;
 
 	public Robot() {
 		logFile.log("Robot constructor finished");
@@ -106,11 +112,12 @@ public class Robot extends IterativeRobot {
 			/* Communicate w/navX-MXP via the MXP SPI Bus. */
 			gyro = new NavxGyro(SPI.Port.kMXP);
 			logFile.log("robotInit() called. navx-mxp initialized");
-			logFile.log("robotInit() gyro is calibrating " + gyro.isCalibrating());
-			if (!gyro.isCalibrating()) {
-				gyro.zeroYaw();
-				logFile.log("robotInit() gyro yaw is zeroed");
+			for (iCalibrationPasses=0; iCalibrationPasses<maxCalibrationPasses; iCalibrationPasses++) {
+				if (!gyro.isCalibrating()) break;
+				logFile.log("robotInit() gyro is calibrating, pass " + iCalibrationPasses);
 			}
+			// gyro.zeroYaw();
+			logFile.log("robotInit() gyro yaw is zeroed");
 		} catch (RuntimeException ex) {
 			String err = "Error instantiating navX-MXP:  " + ex.getMessage();
 			DriverStation.reportError(err, false);
@@ -225,10 +232,10 @@ public class Robot extends IterativeRobot {
 		// Climbing
 		if (!isPickupOrShooting) {
 			double climbAmt = gamePad.getRawAxis(Joystick.AxisType.kY.value); /** 3 - Z Rotate Axis **/
-			logger.log("in teleop. climbAmt =  " + climbAmt) ;
+			//logger.log("in teleop. climbAmt =  " + climbAmt) ;
 			if (climbAmt > 0.0)
 				climbAmt = 0.0;
-			logger.log("in teleop. climbAmt post cap =  " + climbAmt) ;
+			//logger.log("in teleop. climbAmt post cap =  " + climbAmt) ;
 			dashboard.setClimber(climbAmt);
 			climber.set(climbAmt);
 		}
@@ -298,7 +305,7 @@ public class Robot extends IterativeRobot {
 	
 		dashboard.setMode("autonomous init");
 		String amode = dashboard.getSelected();
-		amode = SmartDash.AUTO_NOTHING;
+		//amode = SmartDash.AUTO_NOTHING;
 				
 		logger.log("autonomousInit() called. mode is " + amode);
 
@@ -358,4 +365,10 @@ public class Robot extends IterativeRobot {
 			isLoggerEnabled = true;
 		}
 	}
+	
+	/**
+	 * Call this method to reset controls. This addresses the issue when an operator
+	 * disables Teleop, or Autonomous and the Driver Station "remembers"  Joystick
+	 * settings
+	 */
 }

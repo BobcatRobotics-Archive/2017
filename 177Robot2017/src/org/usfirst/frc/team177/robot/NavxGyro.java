@@ -1,5 +1,6 @@
 package org.usfirst.frc.team177.robot;
 
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.PIDController;
@@ -17,10 +18,10 @@ public class NavxGyro extends AHRS implements PIDOutput {
 	/* and D constants and test the mechanism. */
 	private PIDController turnController;
 	private static final double kP = 0.03;
-	private static final double kI = 0.00;
+	private static final double kI = 0.02;
 	private static final double kD = 0.00;
 	private static final double kF = 0.00;
-	private static final double kToleranceDegrees = 2.0f;
+	private static final double kToleranceDegrees = 1.0f;
 	
 	private double rotateToAngleRate;
 
@@ -34,7 +35,7 @@ public class NavxGyro extends AHRS implements PIDOutput {
 		// Configure PID
 		turnController = new PIDController(kP, kI, kD, kF, this, this);
 		turnController.setInputRange(-180.0f, 180.0f);
-		turnController.setOutputRange(-1.0, 1.0);
+		turnController.setOutputRange(-0.5, 0.5);
 		turnController.setAbsoluteTolerance(kToleranceDegrees);
 		turnController.setContinuous(true);
 		turnController.disable();
@@ -145,6 +146,10 @@ public class NavxGyro extends AHRS implements PIDOutput {
         SmartDashboard.putNumber(   "IMU_Byte_Count",       getByteCount());
         SmartDashboard.putNumber(   "IMU_Update_Count",     getUpdateCount());
         */
+	}
+	
+	public boolean hasStopped() {
+		return (!isMoving() && !isRotating());
 	}
 
 }

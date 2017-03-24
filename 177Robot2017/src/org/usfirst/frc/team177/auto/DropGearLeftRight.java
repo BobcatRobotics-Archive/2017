@@ -20,8 +20,9 @@ public class DropGearLeftRight extends DropGear  {
 	@Override
 	public void autoInit() {
 		super.autoInit();
+		// gyro.zeroYaw();
 		if (!turnLeft)
-			angleToTurn = 180 - angleToTurn; // Adjust angle away from 180
+			angleToTurn = angleToTurn * -1;
 		startingYaw = gyro.getYaw();
 		logger.log("auto init called. (left, angleToTurn)" + turnLeft + ", " + angleToTurn);
 		logger.log("auto init called. startingYaw " + startingYaw);
@@ -49,11 +50,16 @@ public class DropGearLeftRight extends DropGear  {
 		}
 		if (autoStep == 1) {
 			double newAngle = startingYaw + angleToTurn;
+			if (newAngle > 180) {
+				newAngle -= 360;
+			} else if (newAngle < -180) {
+				newAngle += 360;
+			}
 			logger.log("step 1. start yaw, current yaw " + startingYaw + ", " + gyro.getYaw() );
 			logger.log("step 1. turning to angle " + newAngle);
 			gyro.displayData();
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(2000);
+			driveTime.setWatchInMillis(15000);
 			autoStep++;
 		}
 		if (autoStep == 2) {
@@ -64,11 +70,10 @@ public class DropGearLeftRight extends DropGear  {
 				gyro.displayData();
 				displayData.reset();
 			}
-			if (turnLeft)
-				driveTrain.drive(rate * -1.0, rate);
-			else
-				driveTrain.drive(rate,rate * - 1.0);
-			if (driveTime.hasExpired()) {
+			
+			driveTrain.drive(rate * -1.0,rate);
+			
+			if (driveTime.hasExpired() /*gyro.hasStopped()*/) {
 				logger.log("step 2. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
 				logger.log("step 2. final yaw is  " + gyro.getYaw());
 				gyro.displayData();

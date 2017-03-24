@@ -32,15 +32,15 @@ public class SmartDash {
 	public void init() {
 		/** Add selections for autonomous mode **/
 		chooser.addObject("Auto - Drop Gear Straight", AUTO_GEAR_STRAIGHT);
-		chooser.addObject("Auto - Drop Gear Left Side", AUTO_GEAR_LEFT);
+		chooser.addDefault("Auto - Drop Gear Left Side", AUTO_GEAR_LEFT);
 		chooser.addObject("Auto - Drop Gear Right Side", AUTO_GEAR_RIGHT);
 		chooser.addObject("Auto - Drive Backwards", AUTO_DRIVE);
 		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
-		chooser.addDefault("Auto - Do Nothing", AUTO_NOTHING);
+		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
 		SmartDashboard.putData("Auto modes", chooser);
-		SmartDashboard.putNumber("Auto - Distance #1", 90.0);
+		SmartDashboard.putNumber("Auto - Distance #1", 60.0);
 		SmartDashboard.putNumber("Auto - Turn Angle ", 60.0);
-		SmartDashboard.putNumber("Auto - Distance #2", 80.8);
+		SmartDashboard.putNumber("Auto - Distance #2", 24.8);
 		SmartDashboard.putString("Shooter Time", "5");
 		
 		SmartDashboard.putNumber("Left Lower RPM", 2700);
