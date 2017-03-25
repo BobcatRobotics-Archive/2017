@@ -46,6 +46,17 @@ public class DashboardConfiguration {
 		return values;
 	}
 
+	public String[] getKeys() {
+		String[] values = new String[dashVals.size()];
+		Iterator<String> keySet = dashVals.keySet().iterator();
+		int idx = 0;
+		while (keySet.hasNext()) {
+			values[idx] = keySet.next();
+			idx++;
+		}
+		return values;
+	}
+	
 	public void setValue(String key, double val) {
 		boolean update = false;
 		double existingVal = dashVals.getOrDefault(key, -999999.99);

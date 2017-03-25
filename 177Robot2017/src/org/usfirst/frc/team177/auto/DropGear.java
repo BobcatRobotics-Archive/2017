@@ -1,5 +1,6 @@
 package org.usfirst.frc.team177.auto;
 
+import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 
 import edu.wpi.first.wpilibj.Solenoid;
@@ -36,10 +37,9 @@ public abstract class DropGear extends Autonomous {
 
 	@Override
 	public void autoInit() {
-		//distance = dashboard.getGearDistance();
-		distance1 = dashboard.getAutoDistance1();
-		distance2 = dashboard.getAutoDistance2();
-		angleToTurn = dashboard.getTurnAngle();
+		distance1 = dashboard.getValue(SmartDash.AUTO_DISTANCE_1);
+		distance2 = dashboard.getValue(SmartDash.AUTO_DISTANCE_2);
+		angleToTurn = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE);
 		logger.writeLog();
 		logger.log("Drop gear parameters " + distance1 + ", " + distance2 + ", " + angleToTurn);
 
@@ -51,7 +51,7 @@ public abstract class DropGear extends Autonomous {
 		prevRightDistance = 0.0;
 
 		// Set Timers
-		driveTime.setWatchInSeconds(3.0);
+		driveTime.setWatchInSeconds(3);
 		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 

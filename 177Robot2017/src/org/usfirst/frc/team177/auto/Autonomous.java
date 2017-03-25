@@ -42,10 +42,11 @@ public abstract class Autonomous {
 		this.gyro = gyro;
 	}
 	
-	
+	/*
 	private String format(double ld, double rd, double lp, double rp) {
 		return String.format("%5.2f %5.2f %1.5f %1.5f", ld, rd, lp, rp);
 	}
+	*/
 
 	protected void adjustDriveStraight() {
 		double ldist = driveTrain.getLeftDistance();

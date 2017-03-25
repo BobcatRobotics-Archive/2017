@@ -7,6 +7,18 @@ public class SmartPID {
 	private double i;
 	private double d;
 	
+	public SmartPID() {
+		super();
+	}
+
+	public SmartPID(double ff, double p, double i, double d) {
+		this();
+		this.ff = ff;
+		this.p = p;
+		this.i = i;
+		this.d = d;
+	}
+	
 	public double getFF() {
 		return ff;
 	}

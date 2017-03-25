@@ -43,7 +43,8 @@ public class RioLoggerThread extends Thread {
 		endTime = System.currentTimeMillis() + totalLogTime;
 		//log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
 		lg.log("RioLoggerThread setParms() current time, end time " +System.currentTimeMillis() + ", " + endTime );
-		start();
+		if (!isLogging)
+			start();
 	}
 
 	public void log(String line) {
@@ -53,7 +54,12 @@ public class RioLoggerThread extends Thread {
 	public void stopLogging() {
 		isLogging = false;
 	}
+
 	
+	public boolean isLogging() {
+		return isLogging;
+	}
+
 	/* This method will interrupt the current thread */
 	/* write the log and then resume                 */
 	public void writeLog() {

@@ -1,5 +1,6 @@
 package org.usfirst.frc.team177.auto;
 
+import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.Talon;
 
@@ -25,23 +26,22 @@ public class ShootFuel extends Autonomous {
 	
 	@Override
 	public void autoInit() {
-		shootTime = dashboard.getShooterTime();
+		shootTime = dashboard.getValue(SmartDash.AUTO_SHOOT_TIME);
 		logger.log("Shooter Time  is " + shootTime);
 		
 		shooterRPM = dashboard.getShooterRPMS();
 		logger.log("RPM Left Lower " + shooterRPM[0]);
 		logger.log("RPM Left Upper " + shooterRPM[1]);
 		logger.log("RPM Right Lower " + shooterRPM[2]);
-		logger.log("RPM Right Upper " + shooterRPM[3]);		
-		// Set Timers
+		logger.log("RPM Right Upper " + shooterRPM[3]);	
 		
-		driveTimer.setWatchInSeconds(5.0);
-		shootTimer.setWatchInSeconds(shootTime);
+		// Set Timers
+		driveTimer.setWatchInSeconds(5);
+		shootTimer.setWatchInSeconds((long)shootTime);
 	}
 
 	@Override
 	public void autoPeriodic() {
-    	
     	if (shootingStep  == 0 ) {
 			shooterLeft1.setSpeed(shooterRPM[0]);
 			shooterLeft2.setSpeed(shooterRPM[1]);

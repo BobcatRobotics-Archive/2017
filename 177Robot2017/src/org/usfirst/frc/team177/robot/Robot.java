@@ -6,6 +6,8 @@ import org.usfirst.frc.team177.auto.DriveBackwards;
 import org.usfirst.frc.team177.auto.DropGearLeftRight;
 import org.usfirst.frc.team177.auto.DropGearStraight;
 import org.usfirst.frc.team177.auto.ShootFuel;
+import org.usfirst.frc.team177.lib.DashboardConfiguration;
+import org.usfirst.frc.team177.lib.LocalReader;
 import org.usfirst.frc.team177.lib.RioLogger;
 import org.usfirst.frc.team177.lib.RioLoggerThread;
 import org.usfirst.frc.team177.lib.SmartDash;
@@ -28,6 +30,7 @@ public class Robot extends IterativeRobot {
 	private RioLogger logFile = RioLogger.getInstance();
 	private StopWatch logWatch = new StopWatch();
 	private DriverStation ds = DriverStation.getInstance();
+	private DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 	private RioLoggerThread logger = null;
 
 	/* Autonomous mode Class */
@@ -86,6 +89,7 @@ public class Robot extends IterativeRobot {
 	int iCalibrationPasses;
 	double pauseCalibrationSeconds = 0.1;
 
+	
 	public Robot() {
 		logFile.log("Robot constructor finished");
 	}
@@ -117,9 +121,9 @@ public class Robot extends IterativeRobot {
 				logFile.log("robotInit() gyro is calibrating, pass " + iCalibrationPasses);
 			}
 			logFile.log("robotInit() gyro is calibrating " + gyro.isCalibrating());
+			if (!gyro.isCalibrating())
+				gyro.zeroYaw();
 			logFile.log("robotInit() currentYaw " + gyro.getYaw());
-			// gyro.zeroYaw();
-			//logFile.log("robotInit() gyro yaw is zeroed");
 			dashboard.displayData(gyro);
 		} catch (RuntimeException ex) {
 			String err = "Error instantiating navX-MXP:  " + ex.getMessage();
@@ -129,9 +133,20 @@ public class Robot extends IterativeRobot {
 	}
 
 	@Override
+	public void robotPeriodic() {
+		logFile.log("xxxx robotPeriodic() called ");
+	}
+
+	@Override
 	public void disabledInit() {
 		logFile.log("disabledInit() called");
 		startThreadLogger();
+		dashboard.updateDashBoardConfig();
+		if (dashConfig.hasChanged()) {
+			logFile.log("disabledInit() Log file has changed. Updating.");
+			LocalReader lr = new LocalReader();
+			lr.writeDashboardFile(dashConfig);
+		}
 	}
 
 	@Override
@@ -178,6 +193,7 @@ public class Robot extends IterativeRobot {
 
 		// Driving
 		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
+		left = gamePad.getRawAxis(3);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 
@@ -235,13 +251,11 @@ public class Robot extends IterativeRobot {
 
 		// Climbing
 		if (!isPickupOrShooting) {
-			double climbAmt = gamePad.getRawAxis(
-					Joystick.AxisType.kY.value); /** 3 - Z Rotate Axis **/
+			double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
 			// logger.log("in teleop. climbAmt = " + climbAmt) ;
 			if (climbAmt > 0.0)
 				climbAmt = 0.0;
 			// logger.log("in teleop. climbAmt post cap = " + climbAmt) ;
-			dashboard.setClimber(climbAmt);
 			climber.set(climbAmt);
 		}
 
@@ -316,18 +330,18 @@ public class Robot extends IterativeRobot {
 		driveTrain.reset();
 		driveTrain.stop();
 
-		if (SmartDash.AUTO_DRIVE.equals(amode)) {
+		if (SmartDash.AUTO_CMD_DRIVE.equals(amode)) {
 			autoClass = new DriveBackwards();
 			// shifter.set(false);
-		} else if (SmartDash.AUTO_SHOOT.equals(amode)) {
+		} else if (SmartDash.AUTO_CMD_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();
-		} else if (SmartDash.AUTO_GEAR_STRAIGHT.equals(amode)) {
+		} else if (SmartDash.AUTO_CMD_GEAR_STRAIGHT.equals(amode)) {
 			DropGearStraight auto = new DropGearStraight();
 			auto.setPicker(gearShift);
 			auto.setGrabber(gearGrabber);
 			autoClass = auto;
-		} else if (SmartDash.AUTO_GEAR_LEFT.equals(amode) || SmartDash.AUTO_GEAR_RIGHT.equals(amode)) {
-			boolean turnLeft = SmartDash.AUTO_GEAR_LEFT.equals(amode);
+		} else if (SmartDash.AUTO_CMD_GEAR_LEFT.equals(amode) || SmartDash.AUTO_CMD_GEAR_RIGHT.equals(amode)) {
+			boolean turnLeft = SmartDash.AUTO_CMD_GEAR_LEFT.equals(amode);
 			DropGearLeftRight auto = new DropGearLeftRight(turnLeft);
 			auto.setPicker(gearShift);
 			auto.setGrabber(gearGrabber);
@@ -346,10 +360,10 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		/** Smart Dashboard Encoder Values */
-		dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
-		dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
-		dashboard.setAutoLP(driveTrain.getLeftPower());
-		dashboard.setAutoRP(driveTrain.getRightPower());
+		dashboard.setValue(SmartDash.ENCODER_LEFT_DIST,driveTrain.getLeftDistance());
+		dashboard.setValue(SmartDash.ENCODER_RIGHT_DIST,driveTrain.getRightDistance());
+		dashboard.setValue(SmartDash.AUTO_LEFT_POWER,driveTrain.getLeftPower());
+		dashboard.setValue(SmartDash.AUTO_RIGHT_POWER,driveTrain.getRightPower());
 
 		autoClass.autoPeriodic();
 	}

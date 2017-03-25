@@ -17,8 +17,6 @@ public class DriveBackwards extends DropGear {
 
 	@Override
 	public void autoInit() {
-		logger.log("Drop gear distance is " + distance1);
-		
 		driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
 		driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 

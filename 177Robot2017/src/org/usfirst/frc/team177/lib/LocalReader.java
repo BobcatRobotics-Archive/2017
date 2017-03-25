@@ -8,8 +8,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class LocalReader {
+import edu.wpi.first.wpilibj.DriverStation;
 
+public class LocalReader {
+	private RioLogger logFile = RioLogger.getInstance();
 	private final String robotFileName = File.separator + "home" + File.separator + "lvuser" + File.separator + "robot.cfg";
 	private final String dashFileName  = File.separator + "home" + File.separator + "lvuser" + File.separator + "dashboard.cfg";
 	private boolean readFile = false;
@@ -66,6 +68,7 @@ public class LocalReader {
 	}
 
 	public DashboardConfiguration readDashboardFile() {
+		logFile.log("Reading Dashboard Configuration File");
 		readFile = false;
 		DashboardConfiguration config = DashboardConfiguration.getInstance();
 		FileReader file = null;
@@ -80,20 +83,26 @@ public class LocalReader {
 				if (cLine.length > 1)
 					config.setValue(cLine[0].trim(), new Double(cLine[1].trim()));
 			}
+			logFile.log("Read Dashboard Configuration File complete");
 			readFile = true;
 		} catch (FileNotFoundException e) {
 			/* This exception is ok. A default configuration will be used */
+			logFile.log("Dashboard Configuration File not found " + dashFileName);
 			System.out.println("File not found " + dashFileName);
 		} catch (IOException e) {
+			String err = "Error reading configuration file " + e;
+			DriverStation.reportError(err, false);
+			logFile.log(err);
 			e.printStackTrace();
-			System.out.println("Error reading configuration file " + e);
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
+					String err = "Error closing configuration file " + e;
+					DriverStation.reportError(err, false);
+					logFile.log(err);
 					e.printStackTrace();
-					System.out.println("Error closing file " + e);
 				}
 			}
 		}
@@ -101,6 +110,7 @@ public class LocalReader {
 	}
 
 	public boolean writeDashboardFile(DashboardConfiguration dashConfig) {
+		logFile.log("Writing dashboard configuration file");
 		FileWriter file = null;
 		BufferedWriter br = null;
 		try {
@@ -111,20 +121,26 @@ public class LocalReader {
 				br.write(cfg);
 				br.newLine();
 			}
+			logFile.log("Write Dashboard Configuration File complete");
 			writeFile = true;
 		} catch (FileNotFoundException e) {
 			/* This exception is ok. A default configuration will be used */
+			logFile.log("Dashboard Configuration File not found " + dashFileName);
 			System.out.println("File not found " + dashFileName);
 		} catch (IOException e) {
+			String err = "Error writing configuration file " + e;
+			DriverStation.reportError(err, false);
+			logFile.log(err);
 			e.printStackTrace();
-			System.out.println("Error reading configuration file " + e);
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
+					String err = "Error closing configuration file " + e;
+					DriverStation.reportError(err, false);
+					logFile.log(err);
 					e.printStackTrace();
-					System.out.println("Error closing file " + e);
 				}
 			}
 		}

@@ -7,17 +7,42 @@ import com.kauailabs.navx.frc.AHRS.BoardYawAxis;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+@SuppressWarnings("deprecation")
 public class SmartDash {
+	/* Autonomous Modes */
+	public static final String AUTO_CMD_GEAR_STRAIGHT = "agear";
+	public static final String AUTO_CMD_GEAR_LEFT = "agearleft";
+	public static final String AUTO_CMD_GEAR_RIGHT = "agearright";
+	public static final String AUTO_CMD_SHOOT = "ashoot";
+	public static final String AUTO_CMD_DRIVE = "adrive";
+	public static final String AUTO_CMD_NOTHING = "anothing";
+	/* Other variables */
+	public static final String AUTO_STRAIGHT_DISTANCE = "Auto - Straight Distance";
+	public static final String AUTO_DISTANCE_1 = "Auto - Distance #1";
+	public static final String AUTO_DISTANCE_2 = "Auto - Distance #2";
+	public static final String AUTO_TURN_ANGLE = "Auto - Turn Angle";
+	public static final String AUTO_SHOOT_TIME = "Auto - Shooter Time";
+	public static final String AUTO_LEFT_POWER = "Auto - Left Power";
+	public static final String AUTO_RIGHT_POWER = "Auto - Right Power";
+	public static final String SHOOTER_LL_RPM = "Shooter - Left Lower RPM";
+	public static final String SHOOTER_LU_RPM = "Shooter - Left Upper RPM";
+	public static final String SHOOTER_RL_RPM = "Shooter - Right Lower RPM";
+	public static final String SHOOTER_RU_RPM = "Shooter - Right Upper RPM";
+	public static final String ENCODER_LEFT_DIST = "Encoder - Left Distance";
+	public static final String ENCODER_RIGHT_DIST = "Encoder - Right Distance";
+	public static final String SHOOTER_PID_FF = "Shooter - PID FF";
+	public static final String SHOOTER_PID_P = "Shooter - PID P";
+	public static final String SHOOTER_PID_I = "Shooter - PID I";
+	public static final String SHOOTER_PID_D = "Shooter - PID D";
+	public static final String GYRO_PID_P = "Gyro - PID P";
+	public static final String GYRO_PID_I = "Gyro - PID I";
+	public static final String GYRO_PID_D = "Gyro - PID D";
+	public static final String GYRO_DEGREE_TOLERANCE = "Gyro - Degree Tolerance";
 
-	public static final String AUTO_GEAR_STRAIGHT = "agear";
-	public static final String AUTO_GEAR_LEFT = "agearleft";
-	public static final String AUTO_GEAR_RIGHT = "agearright";
-	public static final String AUTO_SHOOT = "ashoot";
-	public static final String AUTO_DRIVE = "adrive";
-	public static final String AUTO_NOTHING = "anothing";
 
-	private SendableChooser<String> chooser = new SendableChooser<>();
-
+	private SendableChooser<String> autoChooser = new SendableChooser<>();
+	private static RioLogger logFile = RioLogger.getInstance();
+	private static LocalReader lr = new LocalReader();
 	private static SmartDash singleton;
 
 	/* Create private constructor */
@@ -34,51 +59,93 @@ public class SmartDash {
 	}
 
 	public void init() {
-		/** Add selections for autonomous mode **/
-		chooser.addObject("Auto - Drop Gear Straight", AUTO_GEAR_STRAIGHT);
-		chooser.addDefault("Auto - Drop Gear Left Side", AUTO_GEAR_LEFT);
-		chooser.addObject("Auto - Drop Gear Right Side", AUTO_GEAR_RIGHT);
-		chooser.addObject("Auto - Drive Backwards", AUTO_DRIVE);
-		chooser.addObject("Auto - Shoot Fuel", AUTO_SHOOT);
-		chooser.addObject("Auto - Do Nothing", AUTO_NOTHING);
-		SmartDashboard.putData("Auto modes", chooser);
-		SmartDashboard.putNumber("Auto - Distance #1", 60.0);
-		SmartDashboard.putNumber("Auto - Turn Angle ", 60.0);
-		SmartDashboard.putNumber("Auto - Distance #2", 24.8);
-		SmartDashboard.putString("Shooter Time", "5");
-		
-		SmartDashboard.putNumber("Left Lower RPM", 2700);
-		SmartDashboard.putNumber("Left Upper RPM", 2700);
-		SmartDashboard.putNumber("Right Lower RPM", 2700);
-		SmartDashboard.putNumber("Right Upper RPM", 2700);
-		
-		
-		/** Encoder Values **/
-		//SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
-		SmartDashboard.putNumber("Enc Left Dist", 0.0);
-		//SmartDashboard.putNumber("Enc 1 Rate", 0.0);
-		//SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
-		SmartDashboard.putNumber("Enc Right Dist", 0.0);
-		//SmartDashboard.putNumber("Enc 2 Rate", 0.0);
+		SmartDashboard.putNumber(AUTO_STRAIGHT_DISTANCE, 90.0);
 
-		SmartDashboard.putNumber("Auto LP", 0.0);
-		SmartDashboard.putNumber("Auto RP", 0.0);
-
-		SmartDashboard.putNumber("climber", 0.0);
-		SmartDashboard.putString("PID FF", "0.028");
-		SmartDashboard.putString("PID P", "0.0015");
-		SmartDashboard.putString("PID I", "0.0");
-		SmartDashboard.putString("PID D", "0.0");
-		
-		//SmartDashboard.putNumber("Gyro Rate", 0.0);
-		//SmartDashboard.putNumber("Gyro Angle", 0.0);
+		SmartDashboard.putNumber(AUTO_DISTANCE_1, 60.0);
+		SmartDashboard.putNumber(AUTO_TURN_ANGLE, 60.0);
+		SmartDashboard.putNumber(AUTO_DISTANCE_2, 24.8);
+		SmartDashboard.putNumber(AUTO_SHOOT_TIME, 5);
+		SmartDashboard.putNumber(AUTO_LEFT_POWER, 0.0);
+		SmartDashboard.putNumber(AUTO_RIGHT_POWER, 0.0);
 	
+		SmartDashboard.putNumber(SHOOTER_LL_RPM, 2700);
+		SmartDashboard.putNumber(SHOOTER_LU_RPM, 2700);
+		SmartDashboard.putNumber(SHOOTER_RL_RPM, 2700);
+		SmartDashboard.putNumber(SHOOTER_RU_RPM, 2700);
+		
+		/* Encoder Values **/
+		SmartDashboard.putNumber(ENCODER_LEFT_DIST, 0.0);
+		//SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
+		//SmartDashboard.putNumber("Enc 1 Rate", 0.0);
+		SmartDashboard.putNumber(ENCODER_RIGHT_DIST, 0.0);
+		//SmartDashboard.putNumber("Enc 2 Rate", 0.0);
+		//SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
+
+		SmartDashboard.putNumber(SHOOTER_PID_FF, 0.028);
+		SmartDashboard.putNumber(SHOOTER_PID_P, 0.0015);
+		SmartDashboard.putNumber(SHOOTER_PID_I, 0.0);
+		SmartDashboard.putNumber(SHOOTER_PID_D, 0.0);
+		
+		SmartDashboard.putNumber(GYRO_DEGREE_TOLERANCE, 1.0);
+		SmartDashboard.putNumber(GYRO_PID_P, 0.03);
+		SmartDashboard.putNumber(GYRO_PID_I, 0.02);
+		SmartDashboard.putNumber(GYRO_PID_D, 0.0);
+		
+		
+		/* Add selections for autonomous mode */
+		autoChooser.addObject("Auto - Drop Gear Straight", AUTO_CMD_GEAR_STRAIGHT);
+		autoChooser.addDefault("Auto - Drop Gear Left Side", AUTO_CMD_GEAR_LEFT);
+		autoChooser.addObject("Auto - Drop Gear Right Side", AUTO_CMD_GEAR_RIGHT);
+		autoChooser.addObject("Auto - Drive Backwards", AUTO_CMD_DRIVE);
+		autoChooser.addObject("Auto - Shoot Fuel", AUTO_CMD_SHOOT);
+		autoChooser.addObject("Auto - Do Nothing", AUTO_CMD_NOTHING);
+		SmartDashboard.putData("Auto modes", autoChooser);
+		
+		// Now that all the default values have been initialized
+		// Read the dashboard.cfg and update/display these values
+		DashboardConfiguration dashConfig = lr.readDashboardFile();
+		dashConfig.finishedInitialRead();
+		if (lr.isReadFile()) {
+			String [] dashEntries = dashConfig.getKeys();
+			for (String entry : dashEntries) {
+				logFile.log("init() update " + entry + ", " + dashConfig.getValue(entry));
+				SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
+			}
+		}
 	}
 
+	public void updateDashBoardConfig() {
+		if (lr.isReadFile()) {
+			DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
+			String [] dashEntries = dashConfig.getKeys();
+			for (String key : dashEntries) {
+				double dashVal = getValue(key);
+				logFile.log("updateDashBoardConfig() setting value " + key + ", " + dashVal);
+				dashConfig.setValue(key, dashVal);
+			}
+		}		
+	}
+	
+	public void setValue(String key, double value) {
+		SmartDashboard.putNumber(key, value);
+	}
+	
+	public double getValue(String key) {
+		return SmartDashboard.getDouble(key);
+	}
+	
 	public void setMode(String mode) {
 		SmartDashboard.putString("Mode", mode);
 	}
-	
+
+	public void setShooterRPMS(double [] rpms) {
+		SmartDashboard.putNumber(SHOOTER_LL_RPM, rpms[0]);
+		SmartDashboard.putNumber(SHOOTER_LU_RPM, rpms[1]);
+		SmartDashboard.putNumber(SHOOTER_RL_RPM, rpms[2]);
+		SmartDashboard.putNumber(SHOOTER_RU_RPM, rpms[3]);
+	}
+
+	/*
 	public void setLeftEncoderDistance(double distance) {
 		SmartDashboard.putNumber("Enc Left Dist", distance);	
 	}
@@ -86,7 +153,7 @@ public class SmartDash {
 	public void setRightEncoderDistance(double distance) {
 		SmartDashboard.putNumber("Enc Right Dist", distance);	
 	}
-	
+	*/
 	/**
 	public void setLeftEncoder(GrayHill encoder) {
 		SmartDashboard.putNumber("Enc 1 Dist", encoder.getDistance());	
@@ -100,7 +167,7 @@ public class SmartDash {
 		SmartDashboard.putNumber("Enc 2 Rate", encoder.getRate());	
 	}
 	*/
-	
+	/**
 	public void setClimber(double climbAmt) {
 		SmartDashboard.putNumber("climber", climbAmt);
 	}
@@ -113,15 +180,9 @@ public class SmartDash {
 		SmartDashboard.putNumber("Auto RP", power);	
 	}
 	
-	/*
-	public void setGyroRate(double power) {
-		SmartDashboard.putNumber("Gyro Rate", power);	
+	public void setAutoStraightDistance(double power) {
+		SmartDashboard.putNumber("Auto - Distance #1", power);	
 	}
-
-	public void setGyroAngle(double power) {
-		SmartDashboard.putNumber("Gyro Angle", power);	
-	}
-	*/
 	
 	public void setAutoDistance1(double power) {
 		SmartDashboard.putNumber("Auto - Distance #1", power);	
@@ -146,51 +207,44 @@ public class SmartDash {
 	public double getAutoDistance2() {
 		return new Double(SmartDashboard.getDouble("Auto - Distance #2"));	
 	}
-
-	public SmartPID getPID() {
-		SmartPID pid = new SmartPID();
-		pid.setFF(new Double(SmartDashboard.getString("PID FF")));
-		pid.setP(new Double(SmartDashboard.getString("PID P")));
-		pid.setI(new Double(SmartDashboard.getString("PID I")));
-		pid.setD(new Double(SmartDashboard.getString("PID D")));
-		return pid;
-	}
-
-	/**
-	public long getShooterRPM() {
-		return new Long(SmartDashboard.getString("Shooter RPM"));
-	} */
-	
-	public double[] getShooterRPMS() {
-		double [] rpms = new double[4];
-		rpms[0] = new Double(SmartDashboard.getDouble("Left Lower RPM"));
-		rpms[1] = new Double(SmartDashboard.getDouble("Left Upper RPM"));
-		rpms[2] = new Double(SmartDashboard.getDouble("Right Lower RPM"));
-		rpms[3] = new Double(SmartDashboard.getDouble("Right Upper RPM"));
-		return rpms;
-	}
-
-	public void setShooterRPMS(double [] rpms) {
-		SmartDashboard.putNumber("Left Lower RPM", rpms[0]);
-		SmartDashboard.putNumber("Left Upper RPM", rpms[1]);
-		SmartDashboard.putNumber("Right Lower RPM", rpms[2]);
-		SmartDashboard.putNumber("Right Upper RPM", rpms[3]);
-	}
-	
+	*/
 	public String getSelected() {
-		String amode = chooser.getSelected();
+		String amode = autoChooser.getSelected();
 		SmartDashboard.putString("Auto",amode);
 		return amode;
 	}
+	
+	public SmartPID getPID() {
+		SmartPID pid = new SmartPID();
+		pid.setFF(SmartDashboard.getDouble(SHOOTER_PID_FF));
+		pid.setP(SmartDashboard.getDouble(SHOOTER_PID_P));
+		pid.setI(SmartDashboard.getDouble(SHOOTER_PID_I));
+		pid.setD(SmartDashboard.getDouble(SHOOTER_PID_D));
+		return pid;
+	}
+
+	
+	public double[] getShooterRPMS() {
+		double [] rpms = new double[4];
+		rpms[0] = SmartDashboard.getDouble(SHOOTER_LL_RPM);
+		rpms[1] = SmartDashboard.getDouble(SHOOTER_LU_RPM);
+		rpms[2] = SmartDashboard.getDouble(SHOOTER_RL_RPM);
+		rpms[3] = SmartDashboard.getDouble(SHOOTER_RU_RPM);
+		return rpms;
+	}
+
+	
+
 	/*
 	public double getGearDistance() {		
 		return new Double(SmartDashboard.getString("Drop Gear Distance"));
 	}
-	*/
+	
 
 	public double getShooterTime() {
 		return new Double(SmartDashboard.getString("Shooter Time"));
 	}
+	*/
 	
 	public void displayData(NavxGyro gyro) {
         /* Display 6-axis Processed Angle Data                                      */
@@ -210,12 +264,12 @@ public class SmartDash {
 
         /* These functions are compatible w/the WPI Gyro Class, providing a simple  */
         /* path for upgrading from the Kit-of-Parts gyro to the navx MXP            */
-        
+        /*
         SmartDashboard.putNumber(   "IMU_TotalYaw",         gyro.getAngle());
         SmartDashboard.putNumber(   "IMU_YawRateDPS",       gyro.getRate());
-
-        /* Display Processed Acceleration Data (Linear Acceleration, Motion Detect) */
+		*/
         
+        /* Display Processed Acceleration Data (Linear Acceleration, Motion Detect) */
         SmartDashboard.putNumber(   "IMU_Accel_X",          gyro.getWorldLinearAccelX());
         SmartDashboard.putNumber(   "IMU_Accel_Y",          gyro.getWorldLinearAccelY());
         SmartDashboard.putBoolean(  "IMU_IsMoving",         gyro.isMoving());
@@ -236,7 +290,7 @@ public class SmartDash {
         /* NOTE:  These values are not normally necessary, but are made available   */
         /* for advanced users.  Before using this data, please consider whether     */
         /* the processed data (see above) will suit your needs.                     */
-        
+        /*
         SmartDashboard.putNumber(   "RawGyro_X",            gyro.getRawGyroX());
         SmartDashboard.putNumber(   "RawGyro_Y",            gyro.getRawGyroY());
         SmartDashboard.putNumber(   "RawGyro_Z",            gyro.getRawGyroZ());
@@ -246,6 +300,7 @@ public class SmartDash {
         SmartDashboard.putNumber(   "RawMag_X",             gyro.getRawMagX());
         SmartDashboard.putNumber(   "RawMag_Y",             gyro.getRawMagY());
         SmartDashboard.putNumber(   "RawMag_Z",             gyro.getRawMagZ());
+        */
         SmartDashboard.putNumber(   "IMU_Temp_C",           gyro.getTempC());
         SmartDashboard.putNumber(   "IMU_Timestamp",        gyro.getLastSensorTimestamp());
         
