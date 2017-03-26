@@ -192,8 +192,7 @@ public class Robot extends IterativeRobot {
 		// dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
 
 		// Driving
-		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
-		left = gamePad.getRawAxis(3);
+		double left = gamePad.getRawAxis(3);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 
