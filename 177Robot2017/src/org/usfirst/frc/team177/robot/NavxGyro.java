@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.SPI.Port;
 
 public class NavxGyro extends AHRS implements PIDOutput {
 	private RioLoggerThread logger = RioLoggerThread.getInstance();
-	private SmartPID gyroPID = new SmartPID(0.0,0.03,0.02,0.0);
+	private SmartPID gyroPID = new SmartPID(0.0,0.035,0.003,0.0);
 	
 	private PIDController turnController;
 	private double toleranceDegrees = 2.0;
@@ -29,7 +29,7 @@ public class NavxGyro extends AHRS implements PIDOutput {
 		// Configure PID
 		turnController = new PIDController(gyroPID.getP(), gyroPID.getI(), gyroPID.getD(), gyroPID.getFF(), this, this);
 		turnController.setInputRange(-180.0f, 180.0f);
-		turnController.setOutputRange(-0.5, 0.5);
+		turnController.setOutputRange(-0.6, 0.6);
 		turnController.setAbsoluteTolerance(toleranceDegrees);
 		turnController.setContinuous(true);
 		turnController.disable();

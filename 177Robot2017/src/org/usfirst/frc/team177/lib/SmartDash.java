@@ -61,17 +61,17 @@ public class SmartDash {
 	public void init() {
 		SmartDashboard.putNumber(AUTO_STRAIGHT_DISTANCE, 90.0);
 
-		SmartDashboard.putNumber(AUTO_DISTANCE_1, 60.0);
+		SmartDashboard.putNumber(AUTO_DISTANCE_1, 80.0);
 		SmartDashboard.putNumber(AUTO_TURN_ANGLE, 60.0);
-		SmartDashboard.putNumber(AUTO_DISTANCE_2, 24.8);
+		SmartDashboard.putNumber(AUTO_DISTANCE_2, 36.0);
 		SmartDashboard.putNumber(AUTO_SHOOT_TIME, 5);
 		SmartDashboard.putNumber(AUTO_LEFT_POWER, 0.0);
 		SmartDashboard.putNumber(AUTO_RIGHT_POWER, 0.0);
 	
-		SmartDashboard.putNumber(SHOOTER_LL_RPM, 2700);
-		SmartDashboard.putNumber(SHOOTER_LU_RPM, 2700);
-		SmartDashboard.putNumber(SHOOTER_RL_RPM, 2700);
-		SmartDashboard.putNumber(SHOOTER_RU_RPM, 2700);
+		SmartDashboard.putNumber(SHOOTER_LL_RPM, 1950);
+		SmartDashboard.putNumber(SHOOTER_LU_RPM, 2400);
+		SmartDashboard.putNumber(SHOOTER_RL_RPM, 2350);
+		SmartDashboard.putNumber(SHOOTER_RU_RPM, 2800);
 		
 		/* Encoder Values **/
 		SmartDashboard.putNumber(ENCODER_LEFT_DIST, 0.0);
@@ -87,8 +87,8 @@ public class SmartDash {
 		SmartDashboard.putNumber(SHOOTER_PID_D, 0.0);
 		
 		SmartDashboard.putNumber(GYRO_DEGREE_TOLERANCE, 1.0);
-		SmartDashboard.putNumber(GYRO_PID_P, 0.03);
-		SmartDashboard.putNumber(GYRO_PID_I, 0.02);
+		SmartDashboard.putNumber(GYRO_PID_P, 0.035);
+		SmartDashboard.putNumber(GYRO_PID_I, 0.003);
 		SmartDashboard.putNumber(GYRO_PID_D, 0.0);
 		
 		

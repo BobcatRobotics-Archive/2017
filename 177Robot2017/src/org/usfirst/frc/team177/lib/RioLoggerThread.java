@@ -19,7 +19,7 @@ public class RioLoggerThread extends Thread {
 	private long totalLogTime = 3600 * 1000L; // Default is 1 hour (milliseconds)
 	private long logFrequency = 150 * 1000L;  // Default is 2 minutes 30 seconds
 	private long endTime = 0L;
-	private boolean isLogging = true;
+	private boolean isLogging = false;
 
 	/* Create private constructor */
 	private RioLoggerThread() {
@@ -43,7 +43,7 @@ public class RioLoggerThread extends Thread {
 		endTime = System.currentTimeMillis() + totalLogTime;
 		//log("current time, end time " +System.currentTimeMillis() + ", " + endTime );
 		lg.log("RioLoggerThread setParms() current time, end time " +System.currentTimeMillis() + ", " + endTime );
-		if (!isLogging)
+		if (!isLogging) 
 			start();
 	}
 
@@ -69,6 +69,7 @@ public class RioLoggerThread extends Thread {
 	@Override
 	public void run() {
 		log("RioLoggerThread started");
+		isLogging = true;
 		do {
 			try {
 					Thread.sleep(logFrequency);

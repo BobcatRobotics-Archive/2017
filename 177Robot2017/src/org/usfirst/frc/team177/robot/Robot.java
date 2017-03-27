@@ -66,7 +66,9 @@ public class Robot extends IterativeRobot {
 	/* Gyro */
 	NavxGyro gyro;
 	// boolean isGyroCreated = true;
-	double[] shooterRPMS = { 2700.0, 2700.0, 2700.0, 2700.0 };
+	double[] shooterRPMS = { 1950.00, 2400.00, 2350.00, 2800.00 };
+	double leftTargetRange = 0.0;
+	double rightTargetRange = 0.0;
 
 	/* Toggle Buttons */
 	ToggleButton gearPickup;
@@ -77,6 +79,8 @@ public class Robot extends IterativeRobot {
 	boolean isGearPickupToggle = false;
 	boolean isShooterPickupToggle = false;
 	boolean isLoggerEnabled = false;
+	boolean setShooterSpeed = true;
+	boolean setHelixOn = false;
 
 	/* Emergency Button for Climber */
 	boolean isEmergency = false;
@@ -134,19 +138,25 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void robotPeriodic() {
-		logFile.log("xxxx robotPeriodic() called ");
 	}
 
 	@Override
 	public void disabledInit() {
 		logFile.log("disabledInit() called");
-		startThreadLogger();
+		//startThreadLogger();
 		dashboard.updateDashBoardConfig();
 		if (dashConfig.hasChanged()) {
 			logFile.log("disabledInit() Log file has changed. Updating.");
 			LocalReader lr = new LocalReader();
 			lr.writeDashboardFile(dashConfig);
 		}
+		shooterLeftLower.setSpeed(0.0);
+		shooterLeftUpper.setSpeed(0.0);
+		shooterRightLower.setSpeed(0.0);
+		shooterRightUpper.setSpeed(0.0);
+		ballGrabber.setSpeed(0.0);
+		climber.set(0.0);
+		setShooterSpeed = true;
 	}
 
 	@Override
@@ -166,6 +176,8 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		logFile.log("teleopInit() called");
 		dashboard.setMode("teleop init");
+		logWatch.setWatchInMillis(100);
+		startThreadLogger();
 
 		ballShift.set(true); /* Out (pickup position) */
 		gearShift.set(false); /* Up position */
@@ -173,11 +185,15 @@ public class Robot extends IterativeRobot {
 
 		// Read PID Parameters
 		SmartPID pid = dashboard.getPID();
+		logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
 		shooterLeftLower.setPIDParameters(pid);
 		shooterLeftUpper.setPIDParameters(pid);
 		shooterRightLower.setPIDParameters(pid);
 		shooterRightUpper.setPIDParameters(pid);
 		shooterRPMS = dashboard.getShooterRPMS();
+		logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+		logger.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 	}
 
 	/*
@@ -185,15 +201,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		startThreadLogger();
 		dashboard.setMode("teleop periodic");
-		logWatch.setWatchInMillis(500);
-		// dashboard.setLeftEncoderDistance(driveTrain.getLeftDistance());
-		// dashboard.setRightEncoderDistance(driveTrain.getRightDistance());
+		dashboard.setValue(SmartDash.ENCODER_LEFT_DIST,driveTrain.getLeftDistance());
+		dashboard.setValue(SmartDash.ENCODER_RIGHT_DIST,driveTrain.getRightDistance());
 
 		// Driving
 		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
-		left = gamePad.getRawAxis(3);
 		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
 		driveTrain.drive(left, right);
 
@@ -207,7 +220,7 @@ public class Robot extends IterativeRobot {
 		if (ballPickup.isOn()) {
 			climber.set(-1.0);
 			ballShift.set(true);
-			ballGrabber.set(1.0);
+			//ballGrabber.set(1.0);
 			isPickupOrShooting = true;
 			isBallPickupToggle = true;
 		} else {
@@ -219,19 +232,19 @@ public class Robot extends IterativeRobot {
 				isBallPickupToggle = false;
 			}
 		}
-		if (!isBallPickupToggle) {
+//		if (!isBallPickupToggle) {
 			if (gamePad.getRawButton(5))
 				ballGrabber.setSpeed(1.0);
 			else if (gamePad.getRawButton(7))
 				ballGrabber.setSpeed(-1.0);
 			else
 				ballGrabber.setSpeed(0.0);
-		}
+//		}
 
 		// Gear Pickup - This controls Gear Grabber and Gear Pickup
 		if (gearPickup.isOn()) {
 			gearShift.set(true);
-			gearGrabber.set(1.0);
+			//gearGrabber.set(.0);
 			isPickupOrShooting = true;
 			isGearPickupToggle = true;
 		} else {
@@ -240,14 +253,14 @@ public class Robot extends IterativeRobot {
 			isPickupOrShooting = false;
 			isGearPickupToggle = false;
 		}
-		if (!isGearPickupToggle) {
+		//if (!isGearPickupToggle) {
 			if (gamePad.getRawButton(6))
 				gearGrabber.setSpeed(1.0);
 			else if (gamePad.getRawButton(8))
-				gearGrabber.setSpeed(-0.5);
+				gearGrabber.setSpeed(-0.3);
 			else
 				gearGrabber.setSpeed(0.0);
-		}
+		//}
 
 		// Climbing
 		if (!isPickupOrShooting) {
@@ -261,16 +274,20 @@ public class Robot extends IterativeRobot {
 
 		// Shooting controls Climber, Helix and Shooting
 		if (shooter.isOn()) {
-			shooterLeftLower.setSpeed(shooterRPMS[0]);
-			shooterLeftUpper.setSpeed(shooterRPMS[1]);
-			shooterRightLower.setSpeed(shooterRPMS[2]);
-			shooterRightUpper.setSpeed(shooterRPMS[3]);
+			if (setShooterSpeed) {
+				shooterLeftLower.setSpeed(shooterRPMS[0]);
+				shooterLeftUpper.setSpeed(shooterRPMS[1]);
+				shooterRightLower.setSpeed(shooterRPMS[2]);
+				shooterRightUpper.setSpeed(shooterRPMS[3]);
+				setShooterSpeed = false;
+			}
 			if (logWatch.hasExpired()) {
 				logWatch.reset();
-				logger.log(shooterLeftLower.getSpeed() + ", " + shooterLeftUpper.getSpeed() + ", " + shooterRightLower.getSpeed() + ", " + shooterRightUpper.getSpeed());
+				logger.log("shooter speeds " + format(shooterLeftLower.getSpeed(),shooterLeftUpper.getSpeed(),shooterRightLower.getSpeed(),shooterRightUpper.getSpeed()));
 			}
 			climber.set(-1.0);
-			helix.set(0.5);
+			//if (setHelixOn)
+				helix.set(0.7);
 			isPickupOrShooting = true;
 			isShooterPickupToggle = true;
 		} else {
@@ -284,6 +301,8 @@ public class Robot extends IterativeRobot {
 				helix.set(0.0);
 				isPickupOrShooting = false;
 				isShooterPickupToggle = false;
+				setShooterSpeed = true;
+				setHelixOn = false;
 			}
 		}
 
@@ -332,7 +351,7 @@ public class Robot extends IterativeRobot {
 
 		if (SmartDash.AUTO_CMD_DRIVE.equals(amode)) {
 			autoClass = new DriveBackwards();
-			// shifter.set(false);
+			shifter.set(false);
 		} else if (SmartDash.AUTO_CMD_SHOOT.equals(amode)) {
 			autoClass = new ShootFuel();
 		} else if (SmartDash.AUTO_CMD_GEAR_STRAIGHT.equals(amode)) {
@@ -373,13 +392,17 @@ public class Robot extends IterativeRobot {
 	 * start the logger afterwards. .
 	 */
 	private void startThreadLogger() {
-		if (ds.isDSAttached() && !isLoggerEnabled) {
+		if (ds.isDSAttached() /*&& !isLoggerEnabled*/) {
 			logger = RioLoggerThread.getInstance();
 			logger.setLoggingParameters(3600,15); /* 1 hour, log every 15 seconds */
 			//logger.log("logger started");
 			logger.writeLog();
 			isLoggerEnabled = true;
 		}
+	}
+
+	private String format(double ld, double rd, double lp, double rp) {
+		return String.format("%9.2f %9.2f %9.2f %9.2f", ld, rd, lp, rp);
 	}
 
 	/**

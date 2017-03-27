@@ -70,7 +70,7 @@ public class DropGearLeftRight extends DropGear  {
 			logger.log("step 1. turning to angle " + newAngle);
 			dashboard.displayData(gyro);
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(15000);
+			driveTime.setWatchInMillis(4000);
 			autoStep++;
 		}
 		if (autoStep == 2) {
@@ -105,20 +105,26 @@ public class DropGearLeftRight extends DropGear  {
 			driveTrain.drive();
 			if (shouldStop(distance2, driveTime)) {
 				logger.log("step 3. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
-				driveTime.setWatchInSeconds(3);
+				driveTime.setWatchInMillis(500);
 				autoStep++;
 			}
 		}
 		if (autoStep == 4) {
 			gearGrabber.setSpeed(-0.5);
 			gearPickup.set(true);
+			if (driveTime.hasExpired()) {
+				driveTime.setWatchInSeconds(2);
+				autoStep++;
+			}
+		}
+		if (autoStep == 5) {
 			driveTrain.drive(LEFT_RIGHT_DRIVE_FORWARDS,LEFT_RIGHT_DRIVE_FORWARDS);
 			if (driveTime.hasExpired()) {
 				//driveTime.setWatchInSeconds(1.5);
 				autoStep++;
 			}
 		}
-		if (autoStep == 5) {
+		if (autoStep == 6) {
 			driveTrain.stop();
 			driveTime.stop();
 			gearGrabber.setSpeed(0);
