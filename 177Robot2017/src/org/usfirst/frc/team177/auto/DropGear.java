@@ -19,8 +19,11 @@ public abstract class DropGear extends Autonomous {
 	protected Victor gearGrabber = null;
 
 	protected double distance1 = 0.0;
-	protected double angleToTurn = 0.0;
 	protected double distance2 = 0.0;
+	protected double distance3 = 0.0;
+	protected double distance4 = 0.0;
+	protected double angleToTurn = 0.0;
+	protected double angleToTurn2 = 0.0;
 	protected int autoStep = 0;
 
 	public DropGear() {
@@ -39,12 +42,15 @@ public abstract class DropGear extends Autonomous {
 	public void autoInit() {
 		distance1 = dashboard.getValue(SmartDash.AUTO_DISTANCE_1);
 		distance2 = dashboard.getValue(SmartDash.AUTO_DISTANCE_2);
-		angleToTurn = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE);
-		logger.writeLog();
-		logger.log("Drop gear parameters " + distance1 + ", " + distance2 + ", " + angleToTurn);
+		distance3 = dashboard.getValue(SmartDash.AUTO_DISTANCE_3);
+		distance4 = dashboard.getValue(SmartDash.AUTO_DISTANCE_4);
+		angleToTurn = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE_1);
+		angleToTurn2 = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE_2);
+		//logger.writeLog();
+		logger.log("DropGear autoInit() " + distance1 + ", " + distance2 + ", " + distance3 + ", " + distance4);
+		logger.log("DropGear autoInit() " + angleToTurn + ", " + angleToTurn2);
 
 		driveTrain.reset();
-		//gyro.reset();
 
 		autoStep = 0;
 		prevLeftDistance = 0.0;

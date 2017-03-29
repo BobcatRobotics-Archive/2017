@@ -8,16 +8,6 @@ import java.util.Iterator;
  *
  */
 public class DashboardConfiguration {
-	/**
-	 * Auto - Distance #1 = 90.0 
-	 * Auto - Turn Angle = 60.0 
-	 * Auto - Distance #2 = 80.8
-	 * 
-	 * Gyro - pid P = 0.03 
-	 * Gyro - pid I = 0.00 
-	 * Gyro - pid D = 0.00 
-	 * Gyro - Degree Tolerance = 2.0
-	 */
 	private static DashboardConfiguration singleton;
 	private TreeMap<String, Double> dashVals = new TreeMap<String, Double>();
 	private boolean hasChanged = false;
@@ -88,6 +78,7 @@ public class DashboardConfiguration {
 	//
 	// Specific variables
 	//
+	/**
 	public double getAutoDistance1() {
 		return getValue("Auto - Distance #1");
 	}
@@ -115,6 +106,7 @@ public class DashboardConfiguration {
 	public double getGyroTolerance() {
 		return getValue("Gyro - Degree Tolerance");
 	}
+	**/
 	//
 	// End Specific Variables
 

@@ -16,14 +16,19 @@ public class SmartDash {
 	public static final String AUTO_CMD_SHOOT = "ashoot";
 	public static final String AUTO_CMD_DRIVE = "adrive";
 	public static final String AUTO_CMD_NOTHING = "anothing";
-	/* Other variables */
+	/* Autonomous Parameters */
 	public static final String AUTO_STRAIGHT_DISTANCE = "Auto - Straight Distance";
 	public static final String AUTO_DISTANCE_1 = "Auto - Distance #1";
 	public static final String AUTO_DISTANCE_2 = "Auto - Distance #2";
-	public static final String AUTO_TURN_ANGLE = "Auto - Turn Angle";
+   	public static final String AUTO_DISTANCE_3 = "Auto - Distance #3";
+  	public static final String AUTO_DISTANCE_4 = "Auto - Distance #4";
+	
+	public static final String AUTO_TURN_ANGLE_1 = "Auto - Turn Angle";
+	public static final String AUTO_TURN_ANGLE_2 = "Auto - Turn Angle #2";
 	public static final String AUTO_SHOOT_TIME = "Auto - Shooter Time";
 	public static final String AUTO_LEFT_POWER = "Auto - Left Power";
 	public static final String AUTO_RIGHT_POWER = "Auto - Right Power";
+	/*  Shooters */
 	public static final String SHOOTER_LL_RPM = "Shooter - Left Lower RPM";
 	public static final String SHOOTER_LU_RPM = "Shooter - Left Upper RPM";
 	public static final String SHOOTER_RL_RPM = "Shooter - Right Lower RPM";
@@ -34,12 +39,40 @@ public class SmartDash {
 	public static final String SHOOTER_PID_P = "Shooter - PID P";
 	public static final String SHOOTER_PID_I = "Shooter - PID I";
 	public static final String SHOOTER_PID_D = "Shooter - PID D";
+	/* Gyro */
 	public static final String GYRO_PID_P = "Gyro - PID P";
 	public static final String GYRO_PID_I = "Gyro - PID I";
 	public static final String GYRO_PID_D = "Gyro - PID D";
 	public static final String GYRO_DEGREE_TOLERANCE = "Gyro - Degree Tolerance";
+	/* Others Variables */
+	
 
-
+	Object [][] defaultValues =  {
+		{ AUTO_STRAIGHT_DISTANCE, 90.0 },
+		{ AUTO_DISTANCE_1, 80.0 },
+		{ AUTO_DISTANCE_2, 36.0 },
+		{ AUTO_DISTANCE_3, 28.0 },
+		{ AUTO_TURN_ANGLE_1, 60.0 },
+		{ AUTO_TURN_ANGLE_2, 26.0 },
+		{ AUTO_SHOOT_TIME, 5.0 },
+		{ AUTO_LEFT_POWER, 0.0 },
+		{ AUTO_RIGHT_POWER, 0.0 },
+		{ SHOOTER_LL_RPM, 1950.0 },
+		{ SHOOTER_LU_RPM, 2400.0 },
+		{ SHOOTER_RL_RPM, 2350.0 },
+		{ SHOOTER_RU_RPM, 2800.0 },
+		{ ENCODER_LEFT_DIST, 0.0 },
+		{ ENCODER_RIGHT_DIST, 0.0 },
+		{ SHOOTER_PID_FF, 0.028 },
+		{ SHOOTER_PID_P, 0.0015 },
+		{ SHOOTER_PID_I, 0.0 },
+		{ SHOOTER_PID_D, 0.0 },
+		{ GYRO_DEGREE_TOLERANCE, 1.0 },
+		{ GYRO_PID_P, 0.035 },
+		{ GYRO_PID_I, 0.003 },
+		{ GYRO_PID_D, 0.0 }
+	};
+	
 	private SendableChooser<String> autoChooser = new SendableChooser<>();
 	private static RioLogger logFile = RioLogger.getInstance();
 	private static LocalReader lr = new LocalReader();
@@ -59,39 +92,6 @@ public class SmartDash {
 	}
 
 	public void init() {
-		SmartDashboard.putNumber(AUTO_STRAIGHT_DISTANCE, 90.0);
-
-		SmartDashboard.putNumber(AUTO_DISTANCE_1, 80.0);
-		SmartDashboard.putNumber(AUTO_TURN_ANGLE, 60.0);
-		SmartDashboard.putNumber(AUTO_DISTANCE_2, 36.0);
-		SmartDashboard.putNumber(AUTO_SHOOT_TIME, 5);
-		SmartDashboard.putNumber(AUTO_LEFT_POWER, 0.0);
-		SmartDashboard.putNumber(AUTO_RIGHT_POWER, 0.0);
-	
-		SmartDashboard.putNumber(SHOOTER_LL_RPM, 1950);
-		SmartDashboard.putNumber(SHOOTER_LU_RPM, 2400);
-		SmartDashboard.putNumber(SHOOTER_RL_RPM, 2350);
-		SmartDashboard.putNumber(SHOOTER_RU_RPM, 2800);
-		
-		/* Encoder Values **/
-		SmartDashboard.putNumber(ENCODER_LEFT_DIST, 0.0);
-		//SmartDashboard.putNumber("Enc 1 Raw ", 0.0);
-		//SmartDashboard.putNumber("Enc 1 Rate", 0.0);
-		SmartDashboard.putNumber(ENCODER_RIGHT_DIST, 0.0);
-		//SmartDashboard.putNumber("Enc 2 Rate", 0.0);
-		//SmartDashboard.putNumber("Enc 2 Raw ", 0.0);
-
-		SmartDashboard.putNumber(SHOOTER_PID_FF, 0.028);
-		SmartDashboard.putNumber(SHOOTER_PID_P, 0.0015);
-		SmartDashboard.putNumber(SHOOTER_PID_I, 0.0);
-		SmartDashboard.putNumber(SHOOTER_PID_D, 0.0);
-		
-		SmartDashboard.putNumber(GYRO_DEGREE_TOLERANCE, 1.0);
-		SmartDashboard.putNumber(GYRO_PID_P, 0.035);
-		SmartDashboard.putNumber(GYRO_PID_I, 0.003);
-		SmartDashboard.putNumber(GYRO_PID_D, 0.0);
-		
-		
 		/* Add selections for autonomous mode */
 		autoChooser.addObject("Auto - Drop Gear Straight", AUTO_CMD_GEAR_STRAIGHT);
 		autoChooser.addDefault("Auto - Drop Gear Left Side", AUTO_CMD_GEAR_LEFT);
@@ -100,27 +100,37 @@ public class SmartDash {
 		autoChooser.addObject("Auto - Shoot Fuel", AUTO_CMD_SHOOT);
 		autoChooser.addObject("Auto - Do Nothing", AUTO_CMD_NOTHING);
 		SmartDashboard.putData("Auto modes", autoChooser);
+
+		/* Add Variables that do not have a default value here */
+		/* Also variables that are not numeric need to go here because only numbers are handled */
+
+		// Default values have been initialized
+		for (Object [] defaults : defaultValues) {
+			SmartDashboard.putNumber((String)defaults[0],(double)defaults[1]);
+			//logFile.log((String)defaults[0] + ", " + (double)defaults[1]);
+		}
 		
-		// Now that all the default values have been initialized
 		// Read the dashboard.cfg and update/display these values
 		DashboardConfiguration dashConfig = lr.readDashboardFile();
 		dashConfig.finishedInitialRead();
-		if (lr.isReadFile()) {
-			String [] dashEntries = dashConfig.getKeys();
-			for (String entry : dashEntries) {
-				logFile.log("init() update " + entry + ", " + dashConfig.getValue(entry));
-				SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
-			}
-		}
+		updateDashboard(dashConfig);
 	}
 
-	public void updateDashBoardConfig() {
+	public void updateDashboard(DashboardConfiguration dashConfig )  {
+		String [] dashEntries = dashConfig.getKeys();
+		for (String entry : dashEntries) {
+			logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
+			SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
+		}
+	}
+	
+	public void updateDashboardConfigFile() {
 		if (lr.isReadFile()) {
 			DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 			String [] dashEntries = dashConfig.getKeys();
 			for (String key : dashEntries) {
 				double dashVal = getValue(key);
-				logFile.log("updateDashBoardConfig() setting value " + key + ", " + dashVal);
+				logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
 				dashConfig.setValue(key, dashVal);
 			}
 		}		

@@ -52,8 +52,8 @@ public class Robot extends IterativeRobot {
 	Solenoid gearShift = new Solenoid(1);
 
 	/* Talons */
-	Talon shooterLeftLower = new Talon(3, true);
-	Talon shooterLeftUpper = new Talon(4, true);
+	Talon shooterLeftLower = new Talon(3, true, true);
+	Talon shooterLeftUpper = new Talon(4, true, true);
 	Talon shooterRightLower = new Talon(1, true);
 	Talon shooterRightUpper = new Talon(2, true);
 
@@ -115,6 +115,7 @@ public class Robot extends IterativeRobot {
 		shooter = new ToggleButton(gamePad,1);
 		logFile.log("robotInit() togglebuttons initialized");
 		
+		
 		/* Navx mxp Gyro */
 		try {
 			/* Communicate w/navX-MXP via the MXP SPI Bus. */
@@ -144,19 +145,13 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		logFile.log("disabledInit() called");
 		//startThreadLogger();
-		dashboard.updateDashBoardConfig();
+		dashboard.updateDashboardConfigFile();
 		if (dashConfig.hasChanged()) {
 			logFile.log("disabledInit() Log file has changed. Updating.");
 			LocalReader lr = new LocalReader();
 			lr.writeDashboardFile(dashConfig);
 		}
-		shooterLeftLower.setSpeed(0.0);
-		shooterLeftUpper.setSpeed(0.0);
-		shooterRightLower.setSpeed(0.0);
-		shooterRightUpper.setSpeed(0.0);
-		ballGrabber.setSpeed(0.0);
-		climber.set(0.0);
-		setShooterSpeed = true;
+		resetControls();
 	}
 
 	@Override
@@ -185,14 +180,14 @@ public class Robot extends IterativeRobot {
 
 		// Read PID Parameters
 		SmartPID pid = dashboard.getPID();
-		logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		//logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
 		logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
 		shooterLeftLower.setPIDParameters(pid);
 		shooterLeftUpper.setPIDParameters(pid);
 		shooterRightLower.setPIDParameters(pid);
 		shooterRightUpper.setPIDParameters(pid);
 		shooterRPMS = dashboard.getShooterRPMS();
-		logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+		//logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 		logger.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 	}
 
@@ -364,6 +359,9 @@ public class Robot extends IterativeRobot {
 			DropGearLeftRight auto = new DropGearLeftRight(turnLeft);
 			auto.setPicker(gearShift);
 			auto.setGrabber(gearGrabber);
+			auto.setHelix(helix);
+			auto.setBallGrabber(ballGrabber);
+			auto.setShooters(shooterLeftLower, shooterLeftUpper, shooterRightLower, shooterRightUpper);
 			autoClass = auto;
 		} else {
 			autoClass = new DoNothing();
@@ -407,7 +405,23 @@ public class Robot extends IterativeRobot {
 
 	/**
 	 * Call this method to reset controls. This addresses the issue when an
-	 * operator disables Teleop, or Autonomous and the Driver Station
-	 * "remembers" Joystick settings and PWM Seetign
+	 * operator disables Teleop, or Autonomous modes early
 	 */
+	private void resetControls() {
+		shooterLeftLower.setSpeed(0.0);
+		shooterLeftUpper.setSpeed(0.0);
+		shooterRightLower.setSpeed(0.0);
+		shooterRightUpper.setSpeed(0.0);
+		ballGrabber.setSpeed(0.0);
+		gearGrabber.setSpeed(0.0);
+		helix.setSpeed(0.0);
+		climber.set(0.0);
+		isPickupOrShooting = false;
+		isBallPickupToggle = false;
+		isGearPickupToggle = false;
+		isShooterPickupToggle = false;
+		isLoggerEnabled = false;
+		setShooterSpeed = true;
+		setHelixOn = false;
+	}
 }

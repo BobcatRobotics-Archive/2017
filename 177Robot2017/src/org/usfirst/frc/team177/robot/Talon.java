@@ -6,29 +6,34 @@ import com.ctre.CANTalon;
 
 public class Talon extends CANTalon {
 
-
 	public Talon(int canID,boolean isClosedLoop) {
+		this(canID,isClosedLoop,false);
+	}
+	
+	public Talon(int canID, boolean isClosedLoop, boolean reverseSensor) {
 		super(canID);
 		enableBrakeMode(false); /* coast mode */
 		if (isClosedLoop) {
-			setClosedLoop();
+			setClosedLoop(reverseSensor);
 		}
 		else {
 			setDirect();
 		}
+		
 	}
 	
 	private void setDirect() {
 		changeControlMode(TalonControlMode.PercentVbus);
 	}
 
-	private void setClosedLoop() {
+	private void setClosedLoop(boolean reverseSensor) {
   		changeControlMode(TalonControlMode.Speed);
   		setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		reverseSensor(false);
+		reverseSensor(reverseSensor);
 	    /* set the peak and nominal outputs, 12V means full */
 		configNominalOutputVoltage(+0.0f, -0.0f);
 		configPeakOutputVoltage(+12.0f, -12.0f);
+		
 	    /* set closed loop gains in slot0 */
 		/* Set Default Values */
 		setProfile(0);

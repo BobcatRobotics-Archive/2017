@@ -34,12 +34,20 @@ public class DropGearStraight extends DropGear {
 		if (autoStep == 1) {
 			gearGrabber.setSpeed(-0.5);
 			gearPickup.set(true);
+			//driveTrain.stop();
+			if (driveTime.hasExpired()) {
+				driveTime.setWatchInMillis(1000);
+				autoStep++;
+			}
+		}
+		if (autoStep == 2) {
 			driveTrain.drive(LEFT_RIGHT_DRIVE_FORWARDS, LEFT_RIGHT_DRIVE_FORWARDS);
 			if (driveTime.hasExpired()) {
 				autoStep++;
 			}
 		}
-		if (autoStep == 2) {
+
+		if (autoStep == 3) {
 			driveTrain.stop();
 			driveTime.stop();
 			gearGrabber.setSpeed(0);
