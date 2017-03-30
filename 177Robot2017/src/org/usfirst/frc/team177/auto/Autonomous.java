@@ -4,27 +4,27 @@ import org.usfirst.frc.team177.lib.RioLoggerThread;
 import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 import org.usfirst.frc.team177.robot.DriveChain;
-import org.usfirst.frc.team177.robot.GrayHill;
+import org.usfirst.frc.team177.robot.NavxGyro;
 
 public abstract class Autonomous {
-
 	protected static final long SAMPLE_RATE = 25L;	/** 25 milliseconds = 20times / seconds */
+	protected static final double INITIAL_LEFT_POWER_FORWARD = -0.60;
+	protected static final double INITIAL_RIGHT_POWER_FORWARD = -0.46;
+	protected static final double INITIAL_LEFT_POWER_BACKWARD = 0.60;
+	protected static final double INITIAL_RIGHT_POWER_BACKWARD = 0.46;
+	
+	/** Variables for Drive Staight */
 	private static final double INCREASE_CORRECTION = 1.05;
 	private static final double DECREASE_CORRECTION = 0.95;
 	private static double deadBandRange = 0.0;
 	protected double prevLeftDistance = 0.0;
 	protected double prevRightDistance = 0.0;
-	protected double leftPower;
-	protected double rightPower;
 	protected StopWatch watch = new StopWatch();
-	//protected long autoStartTime;
 
-	//protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected RioLoggerThread logger = RioLoggerThread.getInstance();
 	protected SmartDash dashboard = SmartDash.getInstance();
-	protected GrayHill left;
-	protected GrayHill right;
-	DriveChain drive;
+	protected DriveChain driveTrain;
+	protected NavxGyro gyro;
 
 	public abstract void autoInit();
 
@@ -32,34 +32,28 @@ public abstract class Autonomous {
 
 	public Autonomous() {
 		super();
-		watch.setWatchInMillis(SAMPLE_RATE);
-	}
-
-	public void setEncoders(GrayHill left, GrayHill right) {
-		this.left = left;
-		this.right = right;
 	}
 
 	public void setDrive(DriveChain drive) {
-		this.drive = drive;
+		this.driveTrain = drive;
 	}
 
-	public double getLeftPower() {
-		return leftPower;
+	public void setGyro(NavxGyro gyro) {
+		this.gyro = gyro;
 	}
-
-	public double getRightPower() {
-		return rightPower;
-	}
-
-	protected String format(double ld, double rd, double lp, double rp) {
+	
+	/*
+	private String format(double ld, double rd, double lp, double rp) {
 		return String.format("%5.2f %5.2f %1.5f %1.5f", ld, rd, lp, rp);
 	}
+	*/
 
 	protected void adjustDriveStraight() {
-		double ldist = left.getDistance();
-		double rdist = right.getDistance();
- 		logger.log(format(ldist,rdist,leftPower,rightPower));
+		double ldist = driveTrain.getLeftDistance();
+		double rdist = driveTrain.getRightDistance();
+		double leftPower = driveTrain.getLeftPower();
+		double rightPower = driveTrain.getRightPower();
+ 		//logger.log(format(ldist,rdist,leftPower,rightPower));
 		
 		double leftdiff  = ldist - prevLeftDistance;
 		prevLeftDistance = ldist;
@@ -80,13 +74,22 @@ public abstract class Autonomous {
 			leftPower *= INCREASE_CORRECTION;
 			rightPower *= DECREASE_CORRECTION;
    		}  	
-		if (leftPower > 1.0) 
-			leftPower = 1.0;
-		else if (leftPower < -1.0) 
-			leftPower = -1.0;
-		if (rightPower > 1.0) 
-			rightPower = 1.0;
-		else if (rightPower < -1.0) 
-			rightPower = -1.0;
+		driveTrain.setLeftPower(leftPower);
+		driveTrain.setRightPower(rightPower);
 	}
+	
+	protected boolean shouldStop(double totalDistance,StopWatch timer) {
+		boolean stop = false;
+		if ((Math.abs(driveTrain.getLeftDistance()) > totalDistance) ||
+			(Math.abs(driveTrain.getRightDistance()) > totalDistance))
+			stop = true;
+		if (timer.hasExpired())
+			stop = true;
+		return stop;
+	}
+
+	protected boolean shouldStopGyro() {
+		return !gyro.isMoving() && !gyro.isRotating();
+	}
+
 }

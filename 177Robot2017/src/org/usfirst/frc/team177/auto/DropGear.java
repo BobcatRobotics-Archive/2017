@@ -1,5 +1,6 @@
 package org.usfirst.frc.team177.auto;
 
+import org.usfirst.frc.team177.lib.SmartDash;
 import org.usfirst.frc.team177.lib.StopWatch;
 
 import edu.wpi.first.wpilibj.Solenoid;
@@ -12,84 +13,53 @@ import edu.wpi.first.wpilibj.Victor;
  * @author bobcat177
  *
  */
-public class DropGear extends Autonomous {
-	private StopWatch driveTime = new StopWatch();
-	private Solenoid pickup = null;
-	private Victor grabber = null;
+public abstract class DropGear extends Autonomous {
+	protected StopWatch driveTime = new StopWatch();
+	protected Solenoid gearPickup = null;
+	protected Victor gearGrabber = null;
 
-	private double distance;
-	private int notMoved = 0;
-	private int autoStep = 0;
+	protected double distance1 = 0.0;
+	protected double distance2 = 0.0;
+	protected double distance3 = 0.0;
+	protected double distance4 = 0.0;
+	protected double angleToTurn = 0.0;
+	protected double angleToTurn2 = 0.0;
+	protected int autoStep = 0;
 
 	public DropGear() {
 		super();
-		leftPower = -0.60;
-		rightPower = -0.46;
+	}
+	
+	public void setPicker(Solenoid pickup) {
+		this.gearPickup = pickup;
+	}
+
+	public void setGrabber(Victor grabber) {
+		this.gearGrabber = grabber;
 	}
 
 	@Override
 	public void autoInit() {
-		distance = dashboard.getGearDistance();
-		logger.log("Drop gear distance is " + distance);
-		left.reset();
-		right.reset();
+		distance1 = dashboard.getValue(SmartDash.AUTO_DISTANCE_1);
+		distance2 = dashboard.getValue(SmartDash.AUTO_DISTANCE_2);
+		distance3 = dashboard.getValue(SmartDash.AUTO_DISTANCE_3);
+		distance4 = dashboard.getValue(SmartDash.AUTO_DISTANCE_4);
+		angleToTurn = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE_1);
+		angleToTurn2 = dashboard.getValue(SmartDash.AUTO_TURN_ANGLE_2);
+		//logger.writeLog();
+		logger.log("DropGear autoInit() " + distance1 + ", " + distance2 + ", " + distance3 + ", " + distance4);
+		logger.log("DropGear autoInit() " + angleToTurn + ", " + angleToTurn2);
+
+		driveTrain.reset();
+
+		autoStep = 0;
 		prevLeftDistance = 0.0;
 		prevRightDistance = 0.0;
 
 		// Set Timers
-		watch.reset();
-		driveTime.setWatchInSeconds(3.0);
+		driveTime.setWatchInSeconds(3);
+		watch.setWatchInMillis(SAMPLE_RATE);
 	}
 
-	@Override
-	public void autoPeriodic() {
-		if (autoStep == 0) {
-			if (watch.hasExpired()) {
-				watch.reset();
-				adjustDriveStraight();
-				// An artificial check for the bot hitting the wall
-				// if notMoved == 10 (robot has been still for 250 millisecond (25 * 10)
-				if ((Math.abs(left.getDistance() - prevLeftDistance) < 0.25))
-					notMoved++;
-				else
-					notMoved = 0;
-			}
-			drive.drive(leftPower, rightPower);
-			if ((left.getDistance() > distance) || (right.getDistance() > distance) ||
-				(driveTime.hasExpired()) || (notMoved == 10)) {
-				autoStep = 1;
-				drive.stop();
-				driveTime.setWatchInSeconds(1.0);
-			}
-		}
-		if (autoStep == 1) {
-			grabber.setSpeed(-0.5);
-			pickup.set(true);
-			drive.drive(0.3, 0.3);
-			if (driveTime.hasExpired()) {
-				autoStep = 2;
-				driveTime.setWatchInSeconds(1.5);
-			}
-		}
-		/*
-		 * if (autoStep == 2) { drive.drive(0.3,0.3); if
-		 * (driveTime.hasExpired()) { autoStep = 3; drive.stop();
-		 * driveTime.stop(); grabber.setSpeed(0); pickup.set(false); } }
-		 */
-		if (autoStep == 2) {
-			autoStep = 3;
-			drive.stop();
-			driveTime.stop();
-			grabber.setSpeed(0);
-			pickup.set(false);
-		}
-	}
-
-	public void setPicker(Solenoid pickup) {
-		this.pickup = pickup;
-	}
-
-	public void setGrabber(Victor grabber) {
-		this.grabber = grabber;
-	}
+	public abstract void autoPeriodic();
 }

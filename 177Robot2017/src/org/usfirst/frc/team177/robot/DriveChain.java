@@ -9,11 +9,18 @@ public class DriveChain {
 	private Victor leftFront;
 	private Victor leftMiddle;
 	private Victor leftRear;
-	
 	private Victor rightFront;
 	private Victor rightMiddle;
 	private Victor rightRear;
+	
+	private GrayHill leftEncoder;
+	private GrayHill rightEncoder;
+	
 	private boolean invertLeft = false;
+	
+	private double leftPower = 0.0;
+	private double rightPower = 0.0;
+	
 	
 	public DriveChain() {
 		super();
@@ -30,33 +37,87 @@ public class DriveChain {
 		rightMiddle = new Victor(rm);
 		rightRear = new Victor(rr);
 	}
+
+	public void setLeftMotorsReverse(boolean invert) {
+		invertLeft = invert;
+	}
 	
-	public void drive(double leftPower, double rightPower) {
-		if (invertLeft )
-			leftPower *= INVERT_MOTOR;
+	public void setLeftEncoder(GrayHill leftEnc) {
+		leftEncoder = leftEnc;
+	}
+
+	public double getLeftDistance() {
+		return leftEncoder.getDistance();
+	}
+	
+	public void setRightEncoder(GrayHill rightEnc) {
+		rightEncoder = rightEnc;
+	}
+
+	public double getRightDistance() {
+		return rightEncoder.getDistance();
+	}
+
+	public double getLeftPower() {
+		return leftPower;
+	}
+
+	public void setLeftPower(double leftPwr) {
+		if (leftPwr > 1.0)
+			leftPwr = 1.0;
 		else
-			rightPower *= INVERT_MOTOR;
+		if (leftPwr < -1.0)
+			leftPwr = 1.0;
+		this.leftPower = leftPwr;
+	}
+
+	public double getRightPower() {
+		return rightPower;
+	}
+
+	public void setRightPower(double rightPwr) {
+		if (rightPwr > 1.0)
+			rightPwr = 1.0;
+		else
+		if (rightPwr < -1.0)
+			rightPwr = 1.0;
+		this.rightPower = rightPwr;
+	}
+
+	public void drive() {
+		drive(leftPower,rightPower);
+	}
+	
+	public void drive(double leftPwr, double rightPwr) {
+		if (invertLeft )
+			leftPwr *= INVERT_MOTOR;
+		else
+			rightPwr *= INVERT_MOTOR;
 		
-		leftFront.set(leftPower);
-		leftMiddle.set(leftPower);
-		leftRear.set(leftPower);
-		
-		rightFront.set(rightPower);
-		rightMiddle.set(rightPower);
-		rightRear.set(rightPower);
+		leftFront.set(leftPwr);
+		leftMiddle.set(leftPwr);
+		leftRear.set(leftPwr);
+		rightFront.set(rightPwr);
+		rightMiddle.set(rightPwr);
+		rightRear.set(rightPwr);
 	}
 
 	public void stop() {
+		leftPower = 0.0;
+		rightPower = 0.0;
+		
 		leftFront.set(0.0);
 		leftMiddle.set(0.0);
 		leftRear.set(0.0);
-		
 		rightFront.set(0.0);
 		rightMiddle.set(0.0);
 		rightRear.set(0.0);
 	}
 
-	public void setLeftMotorsReverse(boolean invert) {
-		invertLeft = invert;
+	public void reset() {
+		leftPower = 0.0;
+		rightPower = 0.0;
+		leftEncoder.reset();
+		rightEncoder.reset();
 	}
 }
