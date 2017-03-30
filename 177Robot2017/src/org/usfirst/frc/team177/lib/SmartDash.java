@@ -119,7 +119,7 @@ public class SmartDash {
 	public void updateDashboard(DashboardConfiguration dashConfig )  {
 		String [] dashEntries = dashConfig.getKeys();
 		for (String entry : dashEntries) {
-			logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
+			//logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
 			SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
 		}
 	}
@@ -130,9 +130,10 @@ public class SmartDash {
 			String [] dashEntries = dashConfig.getKeys();
 			for (String key : dashEntries) {
 				double dashVal = getValue(key);
-				logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
+				//logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
 				dashConfig.setValue(key, dashVal);
 			}
+			dashConfig.setChanged(false);
 		}		
 	}
 	
