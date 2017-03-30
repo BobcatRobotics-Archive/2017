@@ -167,6 +167,16 @@ public class Robot extends IterativeRobot {
 		*/
 	}
 
+	// Used to run tuning tests on the shooters
+	StopWatch shootWatch = new StopWatch();
+	StopWatch delayWatch = new StopWatch();
+	boolean startShooter = true;
+	boolean shouldLog = true;
+	SmartPID pid = new SmartPID();
+	double ff = 0.01;
+	double [] sum = { 0.0, 0.0, 0.0, 0.0 };
+	int cnt = 0;
+	
 	@Override
 	public void teleopInit() {
 		logFile.log("teleopInit() called");
@@ -179,16 +189,36 @@ public class Robot extends IterativeRobot {
 		driveTrain.reset();
 
 		// Read PID Parameters
-		SmartPID pid = dashboard.getPID();
+		pid = dashboard.getPID();
 		//logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
-		logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		//logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
 		shooterLeftLower.setPIDParameters(pid);
 		shooterLeftUpper.setPIDParameters(pid);
 		shooterRightLower.setPIDParameters(pid);
 		shooterRightUpper.setPIDParameters(pid);
 		shooterRPMS = dashboard.getShooterRPMS();
-		//logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+		logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 		logger.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+
+		// Test Code
+		pid.setFF(ff);
+		pid.setP(0.0);
+		pid.setI(0.0);
+		pid.setD(0.0);
+		logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		
+		shooterLeftLower.setPIDParameters(pid);
+		shooterLeftUpper.setPIDParameters(pid);
+		shooterRightLower.setPIDParameters(pid);
+		shooterRightUpper.setPIDParameters(pid);
+
+		//shooterRPMS = new double [] { 2700.0, 2700.0, 2700.0, 2700.0 };
+		shooterRPMS = new double [] { 3500.0, 3500.0, 3500.0, 3500.0 };
+		logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+		logger.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
+		shootWatch.setWatchInSeconds(7);
+		delayWatch.setWatchInSeconds(60);
 	}
 
 	/*
@@ -197,123 +227,63 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		dashboard.setMode("teleop periodic");
-		dashboard.setValue(SmartDash.ENCODER_LEFT_DIST,driveTrain.getLeftDistance());
-		dashboard.setValue(SmartDash.ENCODER_RIGHT_DIST,driveTrain.getRightDistance());
-
-		// Driving
-		double left = leftStick.getRawAxis(Joystick.AxisType.kY.value);
-		double right = rightStick.getRawAxis(Joystick.AxisType.kY.value);
-		driveTrain.drive(left, right);
-
-		// Shifting
-		shifter.set(rightStick.getRawButton(3));
-
-		// Caster
-		caster.set(leftStick.getRawButton(3));
-
-		// Ball Pickup - This controls Climber and ball pickup
-		if (ballPickup.isOn()) {
-			climber.set(-1.0);
-			ballShift.set(true);
-			//ballGrabber.set(1.0);
-			isPickupOrShooting = true;
-			isBallPickupToggle = true;
-		} else {
-			if (isBallPickupToggle) {
-				climber.set(0.0);
-				ballShift.set(false);
-				ballGrabber.set(0.0);
-				isPickupOrShooting = false;
-				isBallPickupToggle = false;
-			}
-		}
-//		if (!isBallPickupToggle) {
-			if (gamePad.getRawButton(5))
-				ballGrabber.setSpeed(1.0);
-			else if (gamePad.getRawButton(7))
-				ballGrabber.setSpeed(-1.0);
-			else
-				ballGrabber.setSpeed(0.0);
-//		}
-
-		// Gear Pickup - This controls Gear Grabber and Gear Pickup
-		if (gearPickup.isOn()) {
-			gearShift.set(true);
-			//gearGrabber.set(.0);
-			isPickupOrShooting = true;
-			isGearPickupToggle = true;
-		} else {
-			gearShift.set(false);
-			gearGrabber.set(0.0);
-			isPickupOrShooting = false;
-			isGearPickupToggle = false;
-		}
-		//if (!isGearPickupToggle) {
-			if (gamePad.getRawButton(6))
-				gearGrabber.setSpeed(1.0);
-			else if (gamePad.getRawButton(8))
-				gearGrabber.setSpeed(-0.3);
-			else
-				gearGrabber.setSpeed(0.0);
-		//}
-
-		// Climbing
-		if (!isPickupOrShooting) {
-			double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
-			// logger.log("in teleop. climbAmt = " + climbAmt) ;
-			if (climbAmt > 0.0)
-				climbAmt = 0.0;
-			// logger.log("in teleop. climbAmt post cap = " + climbAmt) ;
-			climber.set(climbAmt);
-		}
-
-		// Shooting controls Climber, Helix and Shooting
-		if (shooter.isOn()) {
-			if (setShooterSpeed) {
+		
+		if (ff <= 0.05) {
+			if (startShooter) {
 				shooterLeftLower.setSpeed(shooterRPMS[0]);
 				shooterLeftUpper.setSpeed(shooterRPMS[1]);
 				shooterRightLower.setSpeed(shooterRPMS[2]);
 				shooterRightUpper.setSpeed(shooterRPMS[3]);
-				setShooterSpeed = false;
-			}
-			if (logWatch.hasExpired()) {
+				startShooter = false;
+			} 
+		
+			if (logWatch.hasExpired() && shouldLog) {
 				logWatch.reset();
-				logger.log("shooter speeds " + format(shooterLeftLower.getSpeed(),shooterLeftUpper.getSpeed(),shooterRightLower.getSpeed(),shooterRightUpper.getSpeed()));
-			}
-			climber.set(-1.0);
-			//if (setHelixOn)
-				helix.set(0.7);
-			isPickupOrShooting = true;
-			isShooterPickupToggle = true;
-		} else {
-			if (isShooterPickupToggle) {
-				shooterLeftLower.stop();
-				shooterLeftUpper.stop();
-				shooterRightLower.stop();
-				shooterRightUpper.stop();
-
-				climber.set(0.0);
-				helix.set(0.0);
-				isPickupOrShooting = false;
-				isShooterPickupToggle = false;
-				setShooterSpeed = true;
-				setHelixOn = false;
+				logger.log(format(shooterLeftLower.getSpeed(),shooterLeftUpper.getSpeed(),shooterRightLower.getSpeed(),shooterRightUpper.getSpeed()));
+				//logger.log(shooterLeftLower.getSpeed()+","+shooterLeftUpper.getSpeed()+","+shooterRightLower.getSpeed()+","+shooterRightUpper.getSpeed());
+				cnt++;
+				sum[0] += shooterLeftLower.getSpeed();
+				sum[1] += shooterLeftUpper.getSpeed();
+				sum[2] += shooterRightLower.getSpeed();
+				sum[3] += shooterRightUpper.getSpeed();
 			}
 		}
-
-		// Emergency Code if the Climber ratchet shifts
-		/**
-		if (switchBoard.getRawButton(4)) {
-			climber.set(-0.5);
-			isEmergency = true;
+		
+		if (shootWatch.hasExpired()) {
+			logger.log(sum[0] + ", "+  sum[1] + ", "+sum[2] + ", "+sum[3]);
+			logger.log(sum[0]/cnt + ", "+  sum[1]/cnt + ", "+sum[2]/cnt + ", "+sum[3]/cnt);
+			sum[0] = 0.0;
+			sum[1] = 0.0;
+			sum[2] = 0.0;
+			sum[3] = 0.0;
+			cnt = 0;
+			shouldLog = false;
+			
+			shootWatch.setWatchInSeconds(60);
+			delayWatch.setWatchInSeconds(10);
+			shooterLeftLower.stop();
+			shooterLeftUpper.stop();
+			shooterRightUpper.stop();
+			shooterRightLower.stop();
+			
+			ff = ff + 0.005;
+			pid.setFF(ff);
+			logger.log("pid FF " + ff);
+			shooterLeftLower.setPIDParameters(pid);
+			shooterLeftUpper.setPIDParameters(pid);
+			shooterRightLower.setPIDParameters(pid);
+			shooterRightUpper.setPIDParameters(pid);
 		}
-		if (isEmergency && !switchBoard.getRawButton(4)) {
-			climber.set(0.0);
-			isEmergency = false;
+		
+		if (delayWatch.hasExpired()) {
+			shootWatch.setWatchInSeconds(7);
+			delayWatch.setWatchInSeconds(60);
+			startShooter = true;
+			if (ff <= 0.5)
+				shouldLog = true;
+			delayWatch.reset();
 		}
-	 	*/
-		// End Emergency Code
-
+		
 	}
 
 	@Override
