@@ -1,7 +1,5 @@
 package org.usfirst.frc.team177.auto;
 
-import org.usfirst.frc.team177.lib.StopWatch;
-
 /**
  * This class is used in Autonomous Mode to drive straight to the gear drop
  * station 
@@ -9,50 +7,32 @@ import org.usfirst.frc.team177.lib.StopWatch;
  * @author frc177
  *
  */
-public class DriveBackwards extends Autonomous {
-	private StopWatch driveTime = new StopWatch();
-	private double distance;
-	private boolean automode;
+public class DriveBackwards extends DropGear {
+	//private boolean automode;
+	private static final double LINE_DISTANCE = 60.0;
 
 	public DriveBackwards() {
 		super();
-
-		leftPower = 0.60;
-		rightPower = 0.46;
-		automode = true;
 	}
 
-	/**
-	 * public void setDistance(double distance) { this.distance = distance; }
-	 */
 	@Override
 	public void autoInit() {
-		distance = dashboard.getGearDistance();
-		logger.log("Drop gear distance is " + distance);
-		
-		left.reset();
-		right.reset();
-		prevLeftDistance = 0.0;
-		prevRightDistance = 0.0;
+		driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
+		driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 
-		// Set Timers
-		watch.reset();
-		driveTime.setWatchInSeconds(3.0);
+		// Set Timers - Base Timers (driveTime, watch) set in DropGear
 	}
 
 	@Override
 	public void autoPeriodic() {
-
-		if (automode) {
+		if (autoStep == 0) {
 			if (watch.hasExpired()) {
 				watch.reset();
 				adjustDriveStraight();
 			}
-			drive.drive(leftPower, rightPower);
-			if ((left.getDistance() > distance) || (right.getDistance() > distance) || driveTime.hasExpired()) {
-				automode = false;
-				drive.stop();
-				driveTime.stop();
+			driveTrain.drive();
+			if (shouldStop(LINE_DISTANCE, driveTime)) {
+				autoStep++;
 			}
 		}
 	}

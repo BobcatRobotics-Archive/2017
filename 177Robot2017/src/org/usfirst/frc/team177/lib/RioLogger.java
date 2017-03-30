@@ -9,7 +9,7 @@ import java.util.Date;
 
 public class RioLogger {
 	private String path =  File.separator + "home" + File.separator + "lvuser" + File.separator + "logs";
-	private String filename =path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss'.txt'").format(new Date());
+	private String filename =path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss'.txt'").format(new Date());
 	private static RioLogger singleton;
 
 	/* Create private constructor */

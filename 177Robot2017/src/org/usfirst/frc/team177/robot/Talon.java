@@ -3,85 +3,67 @@ package org.usfirst.frc.team177.robot;
 import org.usfirst.frc.team177.lib.SmartPID;
 
 import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
 
-public class Talon {
-
-	private CANTalon talon;
-
-	//private boolean isClosedLoop;
-	//private int canID;
-	private double feedForward = 0.1097;
-	private double pidP = 0.22;
-	private double pidI = 0.0;
-	private double pidD = 0.0;
-	
-	private Talon() {
-		super();
-	}
-
+public class Talon extends CANTalon {
 
 	public Talon(int canID,boolean isClosedLoop) {
-		this();
-		//this.isClosedLoop = isClosedLoop;
-		//this.canID = canID;
-		talon = new CANTalon(canID);
-		talon.enableBrakeMode(false); /* coast mode */
+		this(canID,isClosedLoop,false);
+	}
+	
+	public Talon(int canID, boolean isClosedLoop, boolean reverseSensor) {
+		super(canID);
+		enableBrakeMode(false); /* coast mode */
 		if (isClosedLoop) {
-			setClosedLoop();
+			setClosedLoop(reverseSensor);
 		}
 		else {
 			setDirect();
 		}
+		
 	}
 	
 	private void setDirect() {
-		talon.changeControlMode(TalonControlMode.PercentVbus);
+		changeControlMode(TalonControlMode.PercentVbus);
 	}
 
-	private void setClosedLoop() {
-  		talon.changeControlMode(TalonControlMode.Speed);
-  		talon.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
-		talon.reverseSensor(false);
-	    //_talon.configEncoderCodesPerRev(XXX), // if using FeedbackDevice.QuadEncoder
-	    //_talon.configPotentiometerTurns(XXX), // if using FeedbackDevice.AnalogEncoder or AnalogPot
-
+	private void setClosedLoop(boolean reverseSensor) {
+  		changeControlMode(TalonControlMode.Speed);
+  		setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
+		reverseSensor(reverseSensor);
 	    /* set the peak and nominal outputs, 12V means full */
-		talon.configNominalOutputVoltage(+0.0f, -0.0f);
-		talon.configPeakOutputVoltage(+12.0f, -12.0f);
+		configNominalOutputVoltage(+0.0f, -0.0f);
+		configPeakOutputVoltage(+12.0f, -12.0f);
+		
 	    /* set closed loop gains in slot0 */
-		talon.setProfile(0);
-		talon.setF(feedForward);
-		talon.setP(pidP);
-		talon.setI(pidI); 
-		talon.setD(pidD);
+		/* Set Default Values */
+		setProfile(0);
+		setF( 0.1097);
+		setP(0.22);
+		setI(0.0); 
+		setD(0.0);
 	}
 	
 	public void setSpeed(double speed) {
 		//if (isClosedLoop)
 		//	speed /= 600.0;
-		talon.set(speed);
+		set(speed);
 	}
 	
+	/**
 	public double getSpeed() {
-		return talon.getSpeed();
+		return super.getSpeed();
 	}
+	*/
 	
 	public void stop() {
-		talon.set(0.0);
-		//talon.stopMotor();
+		set(0.0);
 	}
 	
 	public void setPIDParameters(SmartPID pid)  {
-		feedForward = pid.getFF();
-		pidP = pid.getP();
-		pidI = pid.getI();
-		pidD = pid.getD();
-		
-		talon.setF(feedForward);
-		talon.setP(pidP);
-		talon.setI(pidI); 
-		talon.setD(pidD);
+		setProfile(0);
+		setF(pid.getFF());
+		setP(pid.getP());
+		setI(pid.getI()); 
+		setD(pid.getD());
 	}
 }
