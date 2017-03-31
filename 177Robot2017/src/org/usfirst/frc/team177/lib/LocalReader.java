@@ -11,26 +11,42 @@ import java.io.IOException;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class LocalReader {
+	private static LocalReader singleton;
+
 	private RioLogger logFile = RioLogger.getInstance();
 	private final String robotFileName = File.separator + "home" + File.separator + "lvuser" + File.separator + "robot.cfg";
 	private final String dashFileName  = File.separator + "home" + File.separator + "lvuser" + File.separator + "dashboard.cfg";
 	private boolean readFile = false;
+	private boolean readRobotFile = false;
 	private boolean writeFile = false;
 
-	public LocalReader() {
+	/* Create private constructor */
+	private LocalReader() {
 		super();
+	}
+
+	/* Create a static method to get instance. */
+	public static LocalReader getInstance() {
+		if (singleton == null) {
+			singleton = new LocalReader();
+		}
+		return singleton;
 	}
 
 	public boolean isReadFile() {
 		return readFile;
 	}
 
+	public boolean isRobotReadFile() {
+		return readRobotFile;
+	}
+	
 	public boolean isWriteFile() {
 		return writeFile;
 	}
 
 	public RobotConfiguration readConfigFile() {
-		readFile = false;
+		readRobotFile = false;
 		RobotConfiguration config = RobotConfiguration.getInstance();
 		FileReader file = null;
 		BufferedReader br = null;
@@ -42,7 +58,7 @@ public class LocalReader {
 			config.setIncreaseFactor(new Double(split(br.readLine())));
 			config.setDecreaseFactor(new Double(split(br.readLine())));
 			config.setDeadBandRange(new Double(split(br.readLine())));
-			readFile = true;
+			readRobotFile = true;
 		} catch (FileNotFoundException e) {
 			/* This exception is ok. A default configuration will be used */
 			System.out.println("File not found " + robotFileName);

@@ -75,7 +75,7 @@ public class SmartDash {
 	
 	private SendableChooser<String> autoChooser = new SendableChooser<>();
 	private static RioLogger logFile = RioLogger.getInstance();
-	private static LocalReader lr = new LocalReader();
+	private static LocalReader localReader = LocalReader.getInstance();
 	private static SmartDash singleton;
 
 	/* Create private constructor */
@@ -104,36 +104,37 @@ public class SmartDash {
 		/* Add Variables that do not have a default value here */
 		/* Also variables that are not numeric need to go here because only numbers are handled */
 
-		// Default values have been initialized
+		/* Initialize Default Values */
 		for (Object [] defaults : defaultValues) {
 			SmartDashboard.putNumber((String)defaults[0],(double)defaults[1]);
 			//logFile.log((String)defaults[0] + ", " + (double)defaults[1]);
 		}
 		
-		// Read the dashboard.cfg and update/display these values
-		DashboardConfiguration dashConfig = lr.readDashboardFile();
+		/* Read the dashboard.cfg and update/display these values */
+		DashboardConfiguration dashConfig = localReader.readDashboardFile();
 		dashConfig.finishedInitialRead();
 		updateDashboard(dashConfig);
 	}
 
 	public void updateDashboard(DashboardConfiguration dashConfig )  {
+		logFile.log("SmartDash updateDashboard() called");
 		String [] dashEntries = dashConfig.getKeys();
 		for (String entry : dashEntries) {
-			//logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
+			logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
 			SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
 		}
 	}
 	
 	public void updateDashboardConfigFile() {
-		if (lr.isReadFile()) {
+		logFile.log("SmartDash updateDashboardConfigFile() called");
+		if (localReader.isReadFile()) {
 			DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 			String [] dashEntries = dashConfig.getKeys();
 			for (String key : dashEntries) {
 				double dashVal = getValue(key);
-				//logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
+				logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
 				dashConfig.setValue(key, dashVal);
 			}
-			dashConfig.setChanged(false);
 		}		
 	}
 	
