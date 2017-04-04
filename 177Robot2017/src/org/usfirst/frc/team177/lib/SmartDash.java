@@ -52,30 +52,30 @@ public class SmartDash {
 		{ AUTO_DISTANCE_1, 80.0 },
 		{ AUTO_DISTANCE_2, 36.0 },
 		{ AUTO_DISTANCE_3, 28.0 },
-		{ AUTO_TURN_ANGLE_1, 60.0 },
+		{ AUTO_TURN_ANGLE_1, 58.0 },
 		{ AUTO_TURN_ANGLE_2, 26.0 },
 		{ AUTO_SHOOT_TIME, 5.0 },
 		{ AUTO_LEFT_POWER, 0.0 },
 		{ AUTO_RIGHT_POWER, 0.0 },
-		{ SHOOTER_LL_RPM, 1950.0 },
-		{ SHOOTER_LU_RPM, 2400.0 },
-		{ SHOOTER_RL_RPM, 2350.0 },
-		{ SHOOTER_RU_RPM, 2800.0 },
+		{ SHOOTER_LL_RPM, 2500.0 },
+		{ SHOOTER_LU_RPM, 3050.0 },
+		{ SHOOTER_RL_RPM, 2500.0 },
+		{ SHOOTER_RU_RPM, 3100.0 },
 		{ ENCODER_LEFT_DIST, 0.0 },
 		{ ENCODER_RIGHT_DIST, 0.0 },
 		{ SHOOTER_PID_FF, 0.028 },
-		{ SHOOTER_PID_P, 0.0015 },
+		{ SHOOTER_PID_P, 0.002 },
 		{ SHOOTER_PID_I, 0.0 },
 		{ SHOOTER_PID_D, 0.0 },
 		{ GYRO_DEGREE_TOLERANCE, 1.0 },
-		{ GYRO_PID_P, 0.035 },
+		{ GYRO_PID_P, 0.02 },
 		{ GYRO_PID_I, 0.003 },
 		{ GYRO_PID_D, 0.0 }
 	};
 	
 	private SendableChooser<String> autoChooser = new SendableChooser<>();
 	private static RioLogger logFile = RioLogger.getInstance();
-	private static LocalReader lr = new LocalReader();
+	private static LocalReader localReader = LocalReader.getInstance();
 	private static SmartDash singleton;
 
 	/* Create private constructor */
@@ -104,19 +104,20 @@ public class SmartDash {
 		/* Add Variables that do not have a default value here */
 		/* Also variables that are not numeric need to go here because only numbers are handled */
 
-		// Default values have been initialized
+		/* Initialize Default Values */
 		for (Object [] defaults : defaultValues) {
 			SmartDashboard.putNumber((String)defaults[0],(double)defaults[1]);
 			//logFile.log((String)defaults[0] + ", " + (double)defaults[1]);
 		}
 		
-		// Read the dashboard.cfg and update/display these values
-		DashboardConfiguration dashConfig = lr.readDashboardFile();
+		/* Read the dashboard.cfg and update/display these values */
+		DashboardConfiguration dashConfig = localReader.readDashboardFile();
 		dashConfig.finishedInitialRead();
 		updateDashboard(dashConfig);
 	}
 
 	public void updateDashboard(DashboardConfiguration dashConfig )  {
+		logFile.log("SmartDash updateDashboard() called");
 		String [] dashEntries = dashConfig.getKeys();
 		for (String entry : dashEntries) {
 			//logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
@@ -125,7 +126,8 @@ public class SmartDash {
 	}
 	
 	public void updateDashboardConfigFile() {
-		if (lr.isReadFile()) {
+		logFile.log("SmartDash updateDashboardConfigFile() called");
+		if (localReader.isReadFile()) {
 			DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 			String [] dashEntries = dashConfig.getKeys();
 			for (String key : dashEntries) {
@@ -133,7 +135,6 @@ public class SmartDash {
 				//logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
 				dashConfig.setValue(key, dashVal);
 			}
-			dashConfig.setChanged(false);
 		}		
 	}
 	

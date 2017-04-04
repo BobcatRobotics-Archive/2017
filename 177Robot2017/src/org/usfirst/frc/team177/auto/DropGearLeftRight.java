@@ -84,7 +84,7 @@ public class DropGearLeftRight extends DropGear  {
 		shooterRight2.setPIDParameters(pid);
 	
 		// Set Timers - Base Timers (driveTime, watch) set in DropGear
-		displayData.setWatchInMillis(250);
+		displayData.setWatchInMillis(100);
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class DropGearLeftRight extends DropGear  {
 			logger.log("step 1. turning to angle " + newAngle);
 			dashboard.displayData(gyro);
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(2000);
+			driveTime.setWatchInMillis(2500);
 			autoStep++;
 		}
 		if (autoStep == 2) {
@@ -183,7 +183,7 @@ public class DropGearLeftRight extends DropGear  {
 			logger.log("step 6. turning to angle " + newAngle);
 			dashboard.displayData(gyro);
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(1500);
+			driveTime.setWatchInMillis(2000);
 			autoStep++;
 		}
 		if (autoStep == 7) {
@@ -223,6 +223,11 @@ public class DropGearLeftRight extends DropGear  {
 				shooterRight2.setSpeed(shooterRPM[3]);
 				startShooters = false;
 			}
+			if (displayData.hasExpired()) {
+				displayData.reset();
+				logger.log("shooter speeds " + format(shooterLeft1.getSpeed(),shooterLeft2.getSpeed(),shooterRight1.getSpeed(),shooterRight2.getSpeed()));
+			}
+
 			driveTrain.drive();
 			if (shouldStop(distance4, driveTime)) {
 				logger.log("step 8. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
@@ -251,6 +256,10 @@ public class DropGearLeftRight extends DropGear  {
 			gearPickup.set(false);
 			autoStep++;
 		}
+	}
+	
+	private String format(double ld, double rd, double lp, double rp) {
+		return String.format("%9.2f %9.2f %9.2f %9.2f", ld, rd, lp, rp);
 	}
 	
 	private double adjustAngleChange(double angle) {
