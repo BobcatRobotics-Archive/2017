@@ -70,6 +70,10 @@ public class DashboardConfiguration {
 		return hasChanged;
 	}
 
+	public void setChanged(boolean hasChanged) {
+		this.hasChanged = hasChanged;
+	}
+
 	public void finishedInitialRead() {
 		hasChanged = false;
 	}
