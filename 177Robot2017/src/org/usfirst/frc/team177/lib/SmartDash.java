@@ -52,23 +52,23 @@ public class SmartDash {
 		{ AUTO_DISTANCE_1, 80.0 },
 		{ AUTO_DISTANCE_2, 36.0 },
 		{ AUTO_DISTANCE_3, 28.0 },
-		{ AUTO_TURN_ANGLE_1, 60.0 },
+		{ AUTO_TURN_ANGLE_1, 58.0 },
 		{ AUTO_TURN_ANGLE_2, 26.0 },
 		{ AUTO_SHOOT_TIME, 5.0 },
 		{ AUTO_LEFT_POWER, 0.0 },
 		{ AUTO_RIGHT_POWER, 0.0 },
-		{ SHOOTER_LL_RPM, 1950.0 },
-		{ SHOOTER_LU_RPM, 2400.0 },
-		{ SHOOTER_RL_RPM, 2350.0 },
-		{ SHOOTER_RU_RPM, 2800.0 },
+		{ SHOOTER_LL_RPM, 2500.0 },
+		{ SHOOTER_LU_RPM, 3050.0 },
+		{ SHOOTER_RL_RPM, 2500.0 },
+		{ SHOOTER_RU_RPM, 3100.0 },
 		{ ENCODER_LEFT_DIST, 0.0 },
 		{ ENCODER_RIGHT_DIST, 0.0 },
 		{ SHOOTER_PID_FF, 0.028 },
-		{ SHOOTER_PID_P, 0.0015 },
+		{ SHOOTER_PID_P, 0.002 },
 		{ SHOOTER_PID_I, 0.0 },
 		{ SHOOTER_PID_D, 0.0 },
 		{ GYRO_DEGREE_TOLERANCE, 1.0 },
-		{ GYRO_PID_P, 0.035 },
+		{ GYRO_PID_P, 0.02 },
 		{ GYRO_PID_I, 0.003 },
 		{ GYRO_PID_D, 0.0 }
 	};
@@ -120,7 +120,7 @@ public class SmartDash {
 		logFile.log("SmartDash updateDashboard() called");
 		String [] dashEntries = dashConfig.getKeys();
 		for (String entry : dashEntries) {
-			logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
+			//logFile.log("updateDashboard() " + entry + ", " + dashConfig.getValue(entry));
 			SmartDashboard.putNumber(entry, dashConfig.getValue(entry));
 		}
 	}
@@ -132,7 +132,7 @@ public class SmartDash {
 			String [] dashEntries = dashConfig.getKeys();
 			for (String key : dashEntries) {
 				double dashVal = getValue(key);
-				logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
+				//logFile.log("updateDashboardConfigFile() setting value " + key + ", " + dashVal);
 				dashConfig.setValue(key, dashVal);
 			}
 		}		

@@ -29,7 +29,7 @@ public class NavxGyro extends AHRS implements PIDOutput {
 		// Configure PID
 		turnController = new PIDController(gyroPID.getP(), gyroPID.getI(), gyroPID.getD(), gyroPID.getFF(), this, this);
 		turnController.setInputRange(-180.0f, 180.0f);
-		turnController.setOutputRange(-0.45, 0.45);
+		turnController.setOutputRange(-0.41, 0.41);
 		turnController.setAbsoluteTolerance(toleranceDegrees);
 		turnController.setContinuous(true);
 		turnController.disable();

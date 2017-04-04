@@ -48,9 +48,9 @@ public class Robot extends IterativeRobot {
 
 	/* Solenoids */
 	Solenoid shifter = new Solenoid(0); /* For shifting */
-	Solenoid caster = new Solenoid(3); /* For engaging casters */
+	Solenoid caster = new Solenoid(1); /* For engaging casters */
 	Solenoid ballShift = new Solenoid(2);
-	Solenoid gearShift = new Solenoid(1);
+	Solenoid gearShift = new Solenoid(3); 
 
 	/* Talons */
 	Talon shooterLeftLower = new Talon(3, true, true);
@@ -60,14 +60,14 @@ public class Robot extends IterativeRobot {
 
 	/* Victor */
 	Victor climber = new Victor(7);
-	Victor ballGrabber = new Victor(8);
+	Victor ballGrabber = new Victor(19);
 	Victor gearGrabber = new Victor(9);
-	Victor helix = new Victor(3);
+	Victor helix = new Victor(8);
 
 	/* Gyro */
 	NavxGyro gyro;
 	// boolean isGyroCreated = true;
-	double[] shooterRPMS = { 1950.00, 2400.00, 2350.00, 2800.00 };
+	double[] shooterRPMS = { 2500.00, 3050.00, 2500.00, 3100.00 };
 	double leftTargetRange = 0.0;
 	double rightTargetRange = 0.0;
 
@@ -108,8 +108,8 @@ public class Robot extends IterativeRobot {
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
 		driveTrain.setLeftMotorsReverse(false);
-		driveTrain.setLeftEncoder(new GrayHill(2, 3, false));
-		driveTrain.setRightEncoder(new GrayHill(4, 5));
+		driveTrain.setLeftEncoder(new GrayHill(2, 3,true));
+		driveTrain.setRightEncoder(new GrayHill(4, 5,false));
 		logFile.log("robotInit() driveTrain initialized");
 
 		gearPickup = new ToggleButton(gamePad,3);
@@ -219,14 +219,15 @@ public class Robot extends IterativeRobot {
 
 		// Ball Pickup - This controls Climber and ball pickup
 		if (ballPickup.isOn()) {
-			climber.set(-1.0);
+			//climber.set(-1.0);
 			ballShift.set(true);
 			//ballGrabber.set(1.0);
 			isPickupOrShooting = true;
 			isBallPickupToggle = true;
 		} else {
+		
 			if (isBallPickupToggle) {
-				climber.set(0.0);
+				//climber.set(0.0);
 				ballShift.set(false);
 				ballGrabber.set(0.0);
 				isPickupOrShooting = false;
@@ -246,32 +247,32 @@ public class Robot extends IterativeRobot {
 		if (gearPickup.isOn()) {
 			gearShift.set(true);
 			//gearGrabber.set(.0);
-			isPickupOrShooting = true;
+			//isPickupOrShooting = true;
 			isGearPickupToggle = true;
 		} else {
 			gearShift.set(false);
 			gearGrabber.set(0.0);
-			isPickupOrShooting = false;
+			//isPickupOrShooting = false;
 			isGearPickupToggle = false;
 		}
 		//if (!isGearPickupToggle) {
 			if (gamePad.getRawButton(6))
 				gearGrabber.setSpeed(1.0);
 			else if (gamePad.getRawButton(8))
-				gearGrabber.setSpeed(-0.3);
+				gearGrabber.setSpeed(-0.45);
 			else
 				gearGrabber.setSpeed(0.0);
 		//}
 
 		// Climbing
-		if (!isPickupOrShooting) {
+		//if (!isPickupOrShooting) {
 			double climbAmt = gamePad.getRawAxis(3); /** 3 - Z Rotate Axis **/
 			// logger.log("in teleop. climbAmt = " + climbAmt) ;
 			if (climbAmt > 0.0)
 				climbAmt = 0.0;
 			// logger.log("in teleop. climbAmt post cap = " + climbAmt) ;
 			climber.set(climbAmt);
-		}
+		//}
 
 		// Shooting controls Climber, Helix and Shooting
 		if (shooter.isOn()) {
@@ -287,7 +288,7 @@ public class Robot extends IterativeRobot {
 				logger.log("shooter speeds " + format(shooterLeftLower.getSpeed(),shooterLeftUpper.getSpeed(),shooterRightLower.getSpeed(),shooterRightUpper.getSpeed()));
 			}
 			//if (areShootersUptoSpeed() && checkShooterSpeed) {
-				climber.set(-1.0);
+				//climber.set(-1.0);
 				helix.set(0.7);
 				checkShooterSpeed = false;
 			//}
@@ -300,7 +301,7 @@ public class Robot extends IterativeRobot {
 				shooterRightLower.stop();
 				shooterRightUpper.stop();
 
-				climber.set(0.0);
+				//climber.set(0.0);
 				helix.set(0.0);
 				isPickupOrShooting = false;
 				isShooterPickupToggle = false;
