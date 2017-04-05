@@ -13,7 +13,7 @@ public abstract class Autonomous {
 	protected static final double INITIAL_LEFT_POWER_BACKWARD = 0.60;
 	protected static final double INITIAL_RIGHT_POWER_BACKWARD = 0.46;
 	
-	/** Variables for Drive Staight */
+	/** Variables for Drive Straight */
 	private static final double INCREASE_CORRECTION = 1.05;
 	private static final double DECREASE_CORRECTION = 0.95;
 	private static double deadBandRange = 0.0;
