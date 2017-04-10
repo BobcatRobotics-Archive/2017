@@ -1,7 +1,9 @@
 package org.usfirst.frc.team177.auto;
 
 import org.usfirst.frc.team177.lib.SmartDash;
+import org.usfirst.frc.team177.lib.SmartPID;
 import org.usfirst.frc.team177.lib.StopWatch;
+import org.usfirst.frc.team177.robot.Talon;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
@@ -59,6 +61,36 @@ public abstract class DropGear extends Autonomous {
 		// Set Timers
 		driveTime.setWatchInSeconds(3);
 		watch.setWatchInMillis(SAMPLE_RATE);
+	}
+
+	protected double adjustAngleChange(double angle) {
+		double newAngle = angle;
+		if (angle > 180) {
+			newAngle -= 360;
+		} else if (angle < -180) {
+			newAngle += 360;
+		}
+		return newAngle;
+	}
+
+	protected void setShootersPIDS(Talon ll,Talon lu,Talon rl,Talon ru,SmartPID pid) {
+		double llff = 0.026;
+		double luff = 0.0245;
+		double rlff = 0.0255;
+		double ruff = 0.0245;
+		logger.log("shooter pid (P,I,D) " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		ll.setPIDParameters(pid);
+		lu.setPIDParameters(pid);
+		rl.setPIDParameters(pid);
+		ru.setPIDParameters(pid);
+		logger.log("shooter left lower (FF) " + llff);
+		ll.setF(llff);
+		logger.log("shooter left upper (FF) " + luff);
+		lu.setF(luff);
+		logger.log("shooter right lower (FF) " + rlff);
+		rl.setF(rlff);
+		logger.log("shooter right upper (FF) " + ruff);
+		ru.setF(ruff);
 	}
 
 	public abstract void autoPeriodic();
