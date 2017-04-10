@@ -6,6 +6,7 @@ import org.usfirst.frc.team177.auto.DriveBackwards;
 import org.usfirst.frc.team177.auto.DropGearLeftRight;
 import org.usfirst.frc.team177.auto.DropGearStraight;
 import org.usfirst.frc.team177.auto.ShootFuel;
+import org.usfirst.frc.team177.auto.ShootLeftRight;
 import org.usfirst.frc.team177.lib.DashboardConfiguration;
 import org.usfirst.frc.team177.lib.LocalReader;
 import org.usfirst.frc.team177.lib.RioLogger;
@@ -29,6 +30,7 @@ public class Robot extends IterativeRobot {
 	private SmartDash dashboard = SmartDash.getInstance();
 	private RioLogger logFile = RioLogger.getInstance();
 	private StopWatch logWatch = new StopWatch();
+	private StopWatch shooterWatch = new StopWatch();
 	private DriverStation ds = DriverStation.getInstance();
 	private DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 	private LocalReader localReader = LocalReader.getInstance();
@@ -60,6 +62,7 @@ public class Robot extends IterativeRobot {
 
 	/* Victor */
 	Victor climber = new Victor(7);
+	Victor climber2 = new Victor(18);
 	Victor ballGrabber = new Victor(19);
 	Victor gearGrabber = new Victor(9);
 	Victor helix = new Victor(8);
@@ -104,6 +107,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		dashboard.init();
 		logWatch.setWatchInSeconds(30);
+		shooterWatch.setWatchInSeconds(2);
 		
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
@@ -157,6 +161,8 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledPeriodic() {
+		dashboard.setMode("disabled periodic");
+		String amode = dashboard.getSelected();
 		/**
 		if (logWatch.hasExpired()) {
 			logWatch.reset();
@@ -181,14 +187,13 @@ public class Robot extends IterativeRobot {
 
 		// Read PID Parameters
 		SmartPID pid = dashboard.getPID();
-		//logFile.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		//setShootersPIDS(shooterLeftLower, shooterLeftUpper, shooterRightLower, shooterRightUpper, pid);
 		logger.log("shooter pid (FF, P,I,D) " + pid.getFF() + ", " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
 		shooterLeftLower.setPIDParameters(pid);
 		shooterLeftUpper.setPIDParameters(pid);
 		shooterRightLower.setPIDParameters(pid);
 		shooterRightUpper.setPIDParameters(pid);
 		shooterRPMS = dashboard.getShooterRPMS();
-		//logFile.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 		logger.log("teleop init() shooter rpms " + shooterRPMS[0] + ", " + shooterRPMS[1] + ", " + shooterRPMS[2] + ", " + shooterRPMS[3] );
 		
 		leftTargetRange = shooterRPMS[0] / 10.0; // shooterRPMS[0] = Lower Left Shooter
@@ -259,7 +264,7 @@ public class Robot extends IterativeRobot {
 			if (gamePad.getRawButton(6))
 				gearGrabber.setSpeed(1.0);
 			else if (gamePad.getRawButton(8))
-				gearGrabber.setSpeed(-0.45);
+				gearGrabber.setSpeed(-0.5);
 			else
 				gearGrabber.setSpeed(0.0);
 		//}
@@ -272,6 +277,7 @@ public class Robot extends IterativeRobot {
 				climbAmt = 0.0;
 			// logger.log("in teleop. climbAmt post cap = " + climbAmt) ;
 			climber.set(climbAmt);
+			climber2.set(climbAmt);
 		//}
 
 		// Shooting controls Climber, Helix and Shooting
@@ -282,16 +288,18 @@ public class Robot extends IterativeRobot {
 				shooterRightLower.setSpeed(shooterRPMS[2]);
 				shooterRightUpper.setSpeed(shooterRPMS[3]);
 				setShooterSpeed = false;
+				shooterWatch.reset();
 			}
 			if (logWatch.hasExpired()) {
 				logWatch.reset();
 				logger.log("shooter speeds " + format(shooterLeftLower.getSpeed(),shooterLeftUpper.getSpeed(),shooterRightLower.getSpeed(),shooterRightUpper.getSpeed()));
 			}
-			//if (areShootersUptoSpeed() && checkShooterSpeed) {
+			if ((areShootersUptoSpeed() && checkShooterSpeed) ||
+				shooterWatch.hasExpired()) {
 				//climber.set(-1.0);
-				helix.set(0.7);
+				helix.set(0.5);
 				checkShooterSpeed = false;
-			//}
+			}
 			isPickupOrShooting = true;
 			isShooterPickupToggle = true;
 		} else {
@@ -357,16 +365,30 @@ public class Robot extends IterativeRobot {
 
 		dashboard.setMode("autonomous init");
 		String amode = dashboard.getSelected();
-		logger.log("autonomousInit() called. mode is " + amode);
-
+		logger.log("autonomousInit() called. mode from dashboard is " + amode);
+//      Provide ability to force a particular auto mode in code.
+//		amode = "agear";
+//		amode = "agearleft";
+		amode = "agearright";
+//		amode = "ashootleft";
+//        amode = "ashootright";
+//      amode = "adrive";
+//      amode = "anothing";
+        logger.log("in autonomousInit(), overriding amode to: " + amode);
+				  
 		driveTrain.reset();
 		driveTrain.stop();
 
 		if (SmartDash.AUTO_CMD_DRIVE.equals(amode)) {
 			autoClass = new DriveBackwards();
 			shifter.set(false);
-		} else if (SmartDash.AUTO_CMD_SHOOT.equals(amode)) {
-			autoClass = new ShootFuel();
+		} else if (SmartDash.AUTO_CMD_SHOOT_LEFT.equals(amode) || SmartDash.AUTO_CMD_SHOOT_RIGHT.equals(amode)) {
+			boolean turnLeft = SmartDash.AUTO_CMD_SHOOT_LEFT.equals(amode);
+			ShootLeftRight auto = new ShootLeftRight(turnLeft);
+			auto.setHelix(helix);
+			auto.setBallGrabber(ballGrabber);
+			auto.setShooters(shooterLeftLower, shooterLeftUpper, shooterRightLower, shooterRightUpper);
+			autoClass = auto;
 		} else if (SmartDash.AUTO_CMD_GEAR_STRAIGHT.equals(amode)) {
 			DropGearStraight auto = new DropGearStraight();
 			auto.setPicker(gearShift);
@@ -434,6 +456,7 @@ public class Robot extends IterativeRobot {
 		gearGrabber.setSpeed(0.0);
 		helix.setSpeed(0.0);
 		climber.set(0.0);
+		climber2.set(0.0);
 		isPickupOrShooting = false;
 		isBallPickupToggle = false;
 		isGearPickupToggle = false;
@@ -443,4 +466,25 @@ public class Robot extends IterativeRobot {
 		checkShooterSpeed = true;
 		//setHelixOn = false;
 	}
+	
+	public void setShootersPIDS(Talon ll,Talon lu,Talon rl,Talon ru,SmartPID pid) {
+		double llff = 0.026;
+		double luff = 0.0245;
+		double rlff = 0.0255;
+		double ruff = 0.0245;
+		logger.log("shooter pid (P,I,D) " + pid.getP() + ", " + pid.getI() + ", " + pid.getD());
+		ll.setPIDParameters(pid);
+		lu.setPIDParameters(pid);
+		rl.setPIDParameters(pid);
+		ru.setPIDParameters(pid);
+		logger.log("shooter left lower (FF) " + llff);
+		ll.setF(llff);
+		logger.log("shooter left upper (FF) " + luff);
+		lu.setF(luff);
+		logger.log("shooter right lower (FF) " + rlff);
+		rl.setF(rlff);
+		logger.log("shooter right upper (FF) " + ruff);
+		ru.setF(ruff);
+	}
+
 }
