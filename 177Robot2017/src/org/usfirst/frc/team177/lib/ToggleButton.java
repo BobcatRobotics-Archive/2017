@@ -3,10 +3,8 @@ package org.usfirst.frc.team177.lib;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * This class acts as a button toggle. To avoid a bounce it
- * maintains
- * @author bobcat177
- */
+ * This class acts as a button toggle. To uses 1 second for a debounce time
+*/
 public class ToggleButton {
 	private final long PRESS_TIME_MILLIS = 1000L;
 	

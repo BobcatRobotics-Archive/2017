@@ -13,7 +13,8 @@ public class SmartDash {
 	public static final String AUTO_CMD_GEAR_STRAIGHT = "agear";
 	public static final String AUTO_CMD_GEAR_LEFT = "agearleft";
 	public static final String AUTO_CMD_GEAR_RIGHT = "agearright";
-	public static final String AUTO_CMD_SHOOT = "ashoot";
+	public static final String AUTO_CMD_SHOOT_LEFT = "ashootleft";
+	public static final String AUTO_CMD_SHOOT_RIGHT = "ashootright";
 	public static final String AUTO_CMD_DRIVE = "adrive";
 	public static final String AUTO_CMD_NOTHING = "anothing";
 	/* Autonomous Parameters */
@@ -45,8 +46,18 @@ public class SmartDash {
 	public static final String GYRO_PID_D = "Gyro - PID D";
 	public static final String GYRO_DEGREE_TOLERANCE = "Gyro - Degree Tolerance";
 	/* Others Variables */
-	
+	/* Hard coded variable */
+	public static double SHOOTER_PID_FF_HC = 0.03;
+	public static double SHOOTER_PID_P_HC = 0.003;
+	public static double SHOOTER_PID_I_HC = 0.0;
+	public static double SHOOTER_PID_D_HC = 0.0;
+	public static double SHOOTER_LL_RPM_HC=2500.0;
+	public static double SHOOTER_LU_RPM_HC=2700.0;
+	public static double SHOOTER_RL_RPM_HC=2500.0;
+	public static double SHOOTER_RU_RPM_HC=2900.0;
 
+	
+// Updated shooter defaults FF=.03, P=0.003, UL=2600, UR=2700, original defaults below in comment
 	Object [][] defaultValues =  {
 		{ AUTO_STRAIGHT_DISTANCE, 90.0 },
 		{ AUTO_DISTANCE_1, 80.0 },
@@ -58,13 +69,13 @@ public class SmartDash {
 		{ AUTO_LEFT_POWER, 0.0 },
 		{ AUTO_RIGHT_POWER, 0.0 },
 		{ SHOOTER_LL_RPM, 2500.0 },
-		{ SHOOTER_LU_RPM, 3050.0 },
+		{ SHOOTER_LU_RPM, 2600.0 },
 		{ SHOOTER_RL_RPM, 2500.0 },
-		{ SHOOTER_RU_RPM, 3100.0 },
+		{ SHOOTER_RU_RPM, 2700.0 },
 		{ ENCODER_LEFT_DIST, 0.0 },
 		{ ENCODER_RIGHT_DIST, 0.0 },
-		{ SHOOTER_PID_FF, 0.028 },
-		{ SHOOTER_PID_P, 0.002 },
+		{ SHOOTER_PID_FF, 0.03 },
+		{ SHOOTER_PID_P, 0.003 },
 		{ SHOOTER_PID_I, 0.0 },
 		{ SHOOTER_PID_D, 0.0 },
 		{ GYRO_DEGREE_TOLERANCE, 1.0 },
@@ -72,6 +83,31 @@ public class SmartDash {
 		{ GYRO_PID_I, 0.003 },
 		{ GYRO_PID_D, 0.0 }
 	};
+//	Object [][] defaultValues =  {
+//   		{ AUTO_STRAIGHT_DISTANCE, 90.0 },
+//			{ AUTO_DISTANCE_1, 80.0 },
+//			{ AUTO_DISTANCE_2, 36.0 },
+//			{ AUTO_DISTANCE_3, 28.0 },
+//			{ AUTO_TURN_ANGLE_1, 58.0 },
+//			{ AUTO_TURN_ANGLE_2, 26.0 },
+//			{ AUTO_SHOOT_TIME, 5.0 },
+//			{ AUTO_LEFT_POWER, 0.0 },
+//			{ AUTO_RIGHT_POWER, 0.0 },
+//			{ SHOOTER_LL_RPM, 2500.0 },
+//			{ SHOOTER_LU_RPM, 3050.0 },
+//			{ SHOOTER_RL_RPM, 2500.0 },
+//			{ SHOOTER_RU_RPM, 3100.0 },
+//			{ ENCODER_LEFT_DIST, 0.0 },
+//			{ ENCODER_RIGHT_DIST, 0.0 },
+//			{ SHOOTER_PID_FF, 0.028 },
+//			{ SHOOTER_PID_P, 0.002 },
+//			{ SHOOTER_PID_I, 0.0 },
+//			{ SHOOTER_PID_D, 0.0 },
+//			{ GYRO_DEGREE_TOLERANCE, 1.0 },
+//			{ GYRO_PID_P, 0.02 },
+//			{ GYRO_PID_I, 0.003 },
+//			{ GYRO_PID_D, 0.0 }
+//		};
 	
 	private SendableChooser<String> autoChooser = new SendableChooser<>();
 	private static RioLogger logFile = RioLogger.getInstance();
@@ -93,11 +129,19 @@ public class SmartDash {
 
 	public void init() {
 		/* Add selections for autonomous mode */
-		autoChooser.addObject("Auto - Drop Gear Straight", AUTO_CMD_GEAR_STRAIGHT);
-		autoChooser.addDefault("Auto - Drop Gear Left Side", AUTO_CMD_GEAR_LEFT);
+		autoChooser.addDefault("Auto - Drop Gear Straight", AUTO_CMD_GEAR_STRAIGHT);
+//		autoChooser.addDefault("Auto - Drop Gear Left Side", AUTO_CMD_GEAR_LEFT);
+//		autoChooser.addDefault("Auto - Drop Gear Right Side", AUTO_CMD_GEAR_RIGHT);
+//		autoChooser.addDefault("Auto - Drive Backwards", AUTO_CMD_DRIVE);
+//		autoChooser.addDefault("Auto - Shoot Fuel Left Side", AUTO_CMD_SHOOT_LEFT);
+//		autoChooser.addDefault("Auto - Shoot Fuel Right Side", AUTO_CMD_SHOOT_RIGHT);
+//		autoChooser.addDefault("Auto - Do Nothing", AUTO_CMD_NOTHING);
+//		autoChooser.addObject("Auto - Drop Gear Straight", AUTO_CMD_GEAR_STRAIGHT);
+		autoChooser.addObject("Auto - Drop Gear Left Side", AUTO_CMD_GEAR_LEFT);
 		autoChooser.addObject("Auto - Drop Gear Right Side", AUTO_CMD_GEAR_RIGHT);
 		autoChooser.addObject("Auto - Drive Backwards", AUTO_CMD_DRIVE);
-		autoChooser.addObject("Auto - Shoot Fuel", AUTO_CMD_SHOOT);
+		autoChooser.addObject("Auto - Shoot Fuel Left Side", AUTO_CMD_SHOOT_LEFT);
+		autoChooser.addObject("Auto - Shoot Fuel Right Side", AUTO_CMD_SHOOT_RIGHT);
 		autoChooser.addObject("Auto - Do Nothing", AUTO_CMD_NOTHING);
 		SmartDashboard.putData("Auto modes", autoChooser);
 
@@ -228,20 +272,29 @@ public class SmartDash {
 	
 	public SmartPID getPID() {
 		SmartPID pid = new SmartPID();
-		pid.setFF(SmartDashboard.getDouble(SHOOTER_PID_FF));
-		pid.setP(SmartDashboard.getDouble(SHOOTER_PID_P));
-		pid.setI(SmartDashboard.getDouble(SHOOTER_PID_I));
-		pid.setD(SmartDashboard.getDouble(SHOOTER_PID_D));
+//		pid.setFF(SmartDashboard.getDouble(SHOOTER_PID_FF));
+//		pid.setP(SmartDashboard.getDouble(SHOOTER_PID_P));
+//		pid.setI(SmartDashboard.getDouble(SHOOTER_PID_I));
+//		pid.setD(SmartDashboard.getDouble(SHOOTER_PID_D));
+		pid.setFF(SHOOTER_PID_FF_HC);
+		pid.setP(SHOOTER_PID_P_HC);
+		pid.setI(SHOOTER_PID_I_HC);
+		pid.setD(SHOOTER_PID_D_HC);
 		return pid;
 	}
 
 	
 	public double[] getShooterRPMS() {
 		double [] rpms = new double[4];
-		rpms[0] = SmartDashboard.getDouble(SHOOTER_LL_RPM);
-		rpms[1] = SmartDashboard.getDouble(SHOOTER_LU_RPM);
-		rpms[2] = SmartDashboard.getDouble(SHOOTER_RL_RPM);
-		rpms[3] = SmartDashboard.getDouble(SHOOTER_RU_RPM);
+//		rpms[0] = SmartDashboard.getDouble(SHOOTER_LL_RPM);
+//		rpms[1] = SmartDashboard.getDouble(SHOOTER_LU_RPM);
+//		rpms[2] = SmartDashboard.getDouble(SHOOTER_RL_RPM);
+//		rpms[3] = SmartDashboard.getDouble(SHOOTER_RU_RPM);
+		rpms[0] = SHOOTER_LL_RPM_HC;
+		rpms[1] = SHOOTER_LU_RPM_HC;
+		rpms[2] = SHOOTER_RL_RPM_HC;
+		rpms[3] = SHOOTER_RU_RPM_HC;
+
 		return rpms;
 	}
 
