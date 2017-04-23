@@ -16,6 +16,7 @@ public class LocalReader {
 	private RioLogger logFile = RioLogger.getInstance();
 	private final String robotFileName = File.separator + "home" + File.separator + "lvuser" + File.separator + "robot.cfg";
 	private final String dashFileName  = File.separator + "home" + File.separator + "lvuser" + File.separator + "dashboard.cfg";
+	private final String autoFileName  = File.separator + "home" + File.separator + "lvuser" + File.separator + "auto.cfg";
 	private boolean readFile = false;
 	private boolean readRobotFile = false;
 	private boolean writeFile = false;
@@ -162,5 +163,34 @@ public class LocalReader {
 		}
 		return writeFile;
 	}
-
+	
+	public String readAutoFile() {
+		String automode = "";
+		FileReader file = null;
+		BufferedReader br = null;
+		try {
+			file = new FileReader(autoFileName);
+			br = new BufferedReader(file);
+			automode = br.readLine() ;
+		} catch (FileNotFoundException e) {
+			/* This exception is ok. A default configuration will be used */
+		} catch (IOException e) {
+			String err = "Error reading configuration file " + e;
+			DriverStation.reportError(err, false);
+			logFile.log(err);
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					String err = "Error closing configuration file " + e;
+					DriverStation.reportError(err, false);
+					logFile.log(err);
+					e.printStackTrace();
+				}
+			}
+		}
+		return automode;
+	}
 }

@@ -9,13 +9,17 @@ import java.util.Date;
 
 public class RioLogger {
 	private String path =  File.separator + "home" + File.separator + "lvuser" + File.separator + "logs";
-	private String filename =path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss'.txt'").format(new Date());
+	//private String filename =path + File.separator + new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss'.txt'").format(new Date());
+	private String filename =path + File.separator + "eventlog.txt";
 	private static RioLogger singleton;
 
 	/* Create private constructor */
 	private RioLogger() {
 		super();
 		createLogDirectory();
+		log("");
+		log("");
+		log("");
 	}
 
 	/* Create a static method to get instance. */
@@ -32,7 +36,9 @@ public class RioLogger {
 		try {
 			// Open the file
 			outputStream = new BufferedWriter(new FileWriter(filename, true));
-			outputStream.write(line);
+			// Get the current date
+			String cdate = new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss").format(new Date());
+			outputStream.write(cdate + " "  + line);
 			outputStream.newLine();
 
 			// Close the file

@@ -67,8 +67,8 @@ public class DropGearLeftRight extends DropGear  {
 		logger.log("autoInit() called. (left, angleToTurn) " + turnLeft + ", " + angleToTurn);
 		logger.log("autoInit() called. startingYaw " + startingYaw);
 	
-		driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
-		driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
+		driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
+		driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 
 		shooterRPM = dashboard.getShooterRPMS();
 		logger.log("RPM Left Lower " + shooterRPM[0]);
@@ -110,7 +110,7 @@ public class DropGearLeftRight extends DropGear  {
 			logger.log("step 1. turning to angle " + newAngle);
 			dashboard.displayData(gyro);
 			gyro.turnToAngle(newAngle);
-			driveTime.setWatchInMillis(2500);
+			driveTime.setWatchInMillis(3500);
 			autoStep++;
 		}
 		if (autoStep == 2) {
@@ -130,8 +130,8 @@ public class DropGearLeftRight extends DropGear  {
 				dashboard.displayData(gyro);
 				gyro.stopTurn();
 				driveTrain.reset();
-				driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
-				driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
+				driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
+				driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 				driveTime.setWatchInMillis(1000);
 				watch.reset();
 				autoStep++;
@@ -156,8 +156,8 @@ public class DropGearLeftRight extends DropGear  {
 			if (driveTime.hasExpired()) {
 				driveTime.setWatchInSeconds(3);
 				driveTrain.reset();
-				driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
-				driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
+				driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
+				driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
 				autoStep++;
 			}
 		}
@@ -175,7 +175,7 @@ public class DropGearLeftRight extends DropGear  {
 		}
 		if (autoStep == 6) {
 			double changeAngle = 0.0;
-			angleToTurn2=0.0;
+			//angleToTurn2=0.0;
 			if (turnLeft) {
 				changeAngle = gyro.getYaw()  - angleToTurn2;
 			} else {
@@ -200,15 +200,15 @@ public class DropGearLeftRight extends DropGear  {
 			
 			driveTrain.drive(rate * -1.0, rate);
 			
-			if (driveTime.hasExpired() /*gyro.hasStopped()*/) {
+			if (driveTime.hasExpired()) {
 				logger.log("step 7. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
 				logger.log("step 7. final yaw is  " + gyro.getYaw());
 				dashboard.displayData(gyro);
 				gyro.stopTurn();
 				driveTrain.reset();
-				driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
+				driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD); 
 				driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
-				driveTime.setWatchInSeconds(3);
+				driveTime.setWatchInSeconds(10);
 				watch.reset();
 				autoStep++;
 			}		
@@ -218,6 +218,7 @@ public class DropGearLeftRight extends DropGear  {
 				watch.reset();
 				adjustDriveStraight();
 			}
+			/**
 			if (startShooters) {
 				logger.log("step 8. setting shooters on");
 				shooterLeft1.setSpeed(shooterRPM[0]);
@@ -226,13 +227,14 @@ public class DropGearLeftRight extends DropGear  {
 				shooterRight2.setSpeed(shooterRPM[3]);
 				startShooters = false;
 			}
+		
 			if (displayData.hasExpired()) {
 				displayData.reset();
-				logger.log("shooter speeds " + format(shooterLeft1.getSpeed(),shooterLeft2.getSpeed(),shooterRight1.getSpeed(),shooterRight2.getSpeed()));
+				//logger.log("shooter speeds " + format(shooterLeft1.getSpeed(),shooterLeft2.getSpeed(),shooterRight1.getSpeed(),shooterRight2.getSpeed()));
 			}
-
+			*/
 			driveTrain.drive();
-			distance4 = 1.0;
+			//distance4 = 1.0;
 			if (shouldStop(distance4, driveTime)) {
 				logger.log("step 8. encoder distances " + driveTrain.getLeftDistance() + ", " + driveTrain.getRightDistance());
 				driveTime.setWatchInMillis(2000);
@@ -242,8 +244,8 @@ public class DropGearLeftRight extends DropGear  {
 			}
 		}
 		if (autoStep == 9) {
-			helix.set(0.7);
-			ballGrabber.set(1.0);
+			//helix.set(0.7);
+			//ballGrabber.set(1.0);
 			if (shootTimer.hasExpired()) {
 				autoStep++;
 			}

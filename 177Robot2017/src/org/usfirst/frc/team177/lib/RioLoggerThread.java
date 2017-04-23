@@ -48,14 +48,15 @@ public class RioLoggerThread extends Thread {
 	}
 
 	public void log(String line) {
-		logs.add(line);
+		// Get the current date
+		String cdate = new SimpleDateFormat("yyyy-MM-dd_hh.mm.ss").format(new Date());
+		logs.add(cdate + " "  + line);
 	}
 
 	public void stopLogging() {
 		isLogging = false;
 	}
 
-	
 	public boolean isLogging() {
 		return isLogging;
 	}

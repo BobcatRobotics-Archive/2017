@@ -4,6 +4,7 @@ import org.usfirst.frc.team177.lib.SmartDash;
 
 public class DropGearStraight extends DropGear {
 	private static final double LEFT_RIGHT_DRIVE_FORWARDS = -0.4;
+	private static final double LEFT_RIGHT_DRIVE_BACKWARDS = 0.4;
 	private double driveDistance = 0.0;
 
 	@Override
@@ -11,8 +12,8 @@ public class DropGearStraight extends DropGear {
 		super.autoInit();
 		driveDistance = dashboard.getValue(SmartDash.AUTO_STRAIGHT_DISTANCE);
 
-		driveTrain.setLeftPower(INITIAL_LEFT_POWER_BACKWARD);
-		driveTrain.setRightPower(INITIAL_RIGHT_POWER_BACKWARD);
+		driveTrain.setLeftPower(INITIAL_LEFT_POWER_FORWARD);
+		driveTrain.setRightPower(INITIAL_RIGHT_POWER_FORWARD);
 
 		// Set Timers - Base Timers (driveTime, watch) set in DropGear
 	}
@@ -32,7 +33,7 @@ public class DropGearStraight extends DropGear {
 			}
 		}
 		if (autoStep == 1) {
-			gearGrabber.setSpeed(-0.5);
+			//gearGrabber.setSpeed(-0.5);
 			gearPickup.set(true);
 			//driveTrain.stop();
 			if (driveTime.hasExpired()) {
@@ -41,7 +42,7 @@ public class DropGearStraight extends DropGear {
 			}
 		}
 		if (autoStep == 2) {
-			driveTrain.drive(LEFT_RIGHT_DRIVE_FORWARDS, LEFT_RIGHT_DRIVE_FORWARDS);
+			driveTrain.drive(LEFT_RIGHT_DRIVE_BACKWARDS, LEFT_RIGHT_DRIVE_BACKWARDS);
 			if (driveTime.hasExpired()) {
 				autoStep++;
 			}

@@ -31,10 +31,12 @@ public class Robot extends IterativeRobot {
 	private RioLogger logFile = RioLogger.getInstance();
 	private StopWatch logWatch = new StopWatch();
 	private StopWatch shooterWatch = new StopWatch();
+	private StopWatch autoWatch = new StopWatch();
 	private DriverStation ds = DriverStation.getInstance();
 	private DashboardConfiguration dashConfig = DashboardConfiguration.getInstance();
 	private LocalReader localReader = LocalReader.getInstance();
 	private RioLoggerThread logger = null;
+	private String currentAutomode =  "";
 
 	/* Autonomous mode Class */
 	Autonomous autoClass = null;
@@ -107,7 +109,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		dashboard.init();
 		logWatch.setWatchInSeconds(30);
-		shooterWatch.setWatchInSeconds(2);
+		autoWatch.setWatchInSeconds(10);
 		
 		driveTrain.setRightMotors(4, 5, 6);
 		driveTrain.setLeftMotors(0, 1, 2);
@@ -121,6 +123,11 @@ public class Robot extends IterativeRobot {
 		shooter = new ToggleButton(gamePad,1);
 		logFile.log("robotInit() togglebuttons initialized");
 		
+		String automode = localReader.readAutoFile();
+		if (!currentAutomode.equals(automode)) {
+			currentAutomode = automode;
+			DriverStation.reportError("Autonomous mode is " + currentAutomode, false);
+		}
 		
 		/* Navx mxp Gyro */
 		try {
@@ -149,6 +156,11 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledInit() {
+		if (logger != null) {
+			logger.log("disableInit() called.");
+			logger.log("");
+			logger.log("");
+		}
 		logFile.log("disabledInit() called");
 		//startThreadLogger();
 		dashboard.updateDashboardConfigFile();
@@ -161,8 +173,15 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void disabledPeriodic() {
-		dashboard.setMode("disabled periodic");
-		String amode = dashboard.getSelected();
+		if (autoWatch.hasExpired()) {
+			autoWatch.reset();
+			String automode = localReader.readAutoFile();
+			if (!currentAutomode.equals(automode)) {
+				currentAutomode = automode;
+				DriverStation.reportError("Autonomous mode is " + currentAutomode, false);
+			}
+		}
+		
 		/**
 		if (logWatch.hasExpired()) {
 			logWatch.reset();
@@ -364,14 +383,20 @@ public class Robot extends IterativeRobot {
 		startThreadLogger();
 
 		dashboard.setMode("autonomous init");
-		String amode = dashboard.getSelected();
-		logger.log("autonomousInit() called. mode from dashboard is " + amode);
+		
+		String amode = localReader.readAutoFile();
+		if (!"".equals(amode)) {
+			DriverStation.reportError("Running Autonomous. mode is " + currentAutomode, false);
+		} else {
+			amode = dashboard.getSelected();
+		}
+		logger.log("autonomousInit() called. mode is " + amode);
 //      Provide ability to force a particular auto mode in code.
 //		amode = "agear";
 //		amode = "agearleft";
-		amode = "agearright";
+//		amode = "agearright";
 //		amode = "ashootleft";
-//        amode = "ashootright";
+//      amode = "ashootright";
 //      amode = "adrive";
 //      amode = "anothing";
         logger.log("in autonomousInit(), overriding amode to: " + amode);
